@@ -1,0 +1,6 @@
+@SmaStamaFeedbackHub.WebAPI_HostAddress = http://localhost:5289
+
+GET {{SmaStamaFeedbackHub.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
