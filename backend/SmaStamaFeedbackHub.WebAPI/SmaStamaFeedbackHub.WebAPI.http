@@ -1,6 +1,51 @@
-@SmaStamaFeedbackHub.WebAPI_HostAddress = http://localhost:5289
+@Host = http://localhost:5289
+@AdminCode = ADMIN001
+@StudentCode = 2023001
+@DefaultPassword = admin123
+@StudentPassword = student123
 
-GET {{SmaStamaFeedbackHub.WebAPI_HostAddress}}/weatherforecast/
-Accept: application/json
+### Login as Admin
+# @name adminLogin
+POST {{Host}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "code": "{{AdminCode}}",
+  "password": "{{DefaultPassword}}"
+}
+
+###
+
+@adminToken = {{adminLogin.response.body.token}}
+
+### Login as Student
+# @name studentLogin
+POST {{Host}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "code": "{{StudentCode}}",
+  "password": "{{StudentPassword}}"
+}
+
+###
+
+@studentToken = {{studentLogin.response.body.token}}
+
+### Get Feedback List (Admin)
+GET {{Host}}/api/Feedback/GetFeedbackList
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Get Feedback List (Student)
+GET {{Host}}/api/Feedback/GetFeedbackList
+Authorization: Bearer {{studentToken}}
+
+###
+
+### Get Feedback Detail
+GET {{Host}}/api/Feedback/GetFeedbackDetail?id=00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{adminToken}}
 
 ###

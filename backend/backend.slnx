@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="SmaStamaFeedbackHub.Commons/SmaStamaFeedbackHub.Commons.csproj" />
+  <Project Path="SmaStamaFeedbackHub.Contracts/SmaStamaFeedbackHub.Contracts.csproj" />
+  <Project Path="SmaStamaFeedbackHub.Entities/SmaStamaFeedbackHub.Entities.csproj" />
+  <Project Path="SmaStamaFeedbackHub.Infrastructure/SmaStamaFeedbackHub.Infrastructure.csproj" />
   <Project Path="SmaStamaFeedbackHub.WebAPI/SmaStamaFeedbackHub.WebAPI.csproj" />
 </Solution>
