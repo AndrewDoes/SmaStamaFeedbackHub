@@ -1,4 +1,4 @@
-namespace SmaStamaFeedbackHub.Contracts.Auth.Requests;
+namespace SmaStamaFeedbackHub.Contracts.Requests.Auth;
 
 public class LoginRequest
 {

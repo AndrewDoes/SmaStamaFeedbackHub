@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SmaStamaFeedbackHub.Commons.Handlers.Auth;
-using SmaStamaFeedbackHub.Contracts.Auth.Requests;
+using SmaStamaFeedbackHub.Contracts.Requests.Auth;
 
 namespace SmaStamaFeedbackHub.WebAPI.Controllers;
 

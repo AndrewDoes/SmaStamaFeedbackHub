@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using SmaStamaFeedbackHub.Contracts.Feedback.Responses;
+using SmaStamaFeedbackHub.Contracts.Responses.Feedback;
 using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Feedback;

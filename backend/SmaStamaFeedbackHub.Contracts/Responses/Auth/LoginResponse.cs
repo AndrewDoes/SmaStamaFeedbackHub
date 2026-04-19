@@ -1,4 +1,4 @@
-namespace SmaStamaFeedbackHub.Contracts.Auth.Responses;
+namespace SmaStamaFeedbackHub.Contracts.Responses.Auth;
 
 public class LoginResponse
 {

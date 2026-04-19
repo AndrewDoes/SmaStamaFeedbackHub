@@ -1,6 +1,8 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmaStamaFeedbackHub.Commons.Handlers.Feedback;
+using SmaStamaFeedbackHub.Contracts.Requests.Feedback;
 
 namespace SmaStamaFeedbackHub.WebAPI.Controllers;
 
@@ -25,5 +27,19 @@ public class FeedbackController : ControllerBase
     public async Task<IActionResult> GetDetail([FromQuery] Guid id)
     {
         return Ok(await _mediator.Send(new GetFeedbackDetailQuery(id)));
+    }
+
+    [Authorize]
+    [HttpPost("SubmitFeedback")]
+    public async Task<IActionResult> Submit([FromBody] CreateFeedbackRequest request)
+    {
+        var command = new SubmitFeedbackCommand
+        {
+            Title = request.Title,
+            Content = request.Content
+        };
+
+        var id = await _mediator.Send(command);
+        return Ok(new { Id = id });
     }
 }

@@ -1,16 +1,16 @@
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SmaStamaFeedbackHub.Commons;
 using SmaStamaFeedbackHub.Commons.Behaviors;
+using SmaStamaFeedbackHub.Commons.Handlers.Auth;
+using SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 using SmaStamaFeedbackHub.Entities;
 using SmaStamaFeedbackHub.Infrastructure;
 using SmaStamaFeedbackHub.WebAPI;
 using System.Text;
-using MediatR;
-
-using SmaStamaFeedbackHub.Commons.Handlers.Auth;
-using SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,9 +41,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// MediatR
+// MediatR & Validation
+builder.Services.AddValidatorsFromAssembly(typeof(IJwtService).Assembly);
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(GetFeedbackListQuery).Assembly);
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(SafetyFilterBehavior<,>));
 });
 

@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SmaStamaFeedbackHub.Commons;
-using SmaStamaFeedbackHub.Contracts.Auth.Requests;
-using SmaStamaFeedbackHub.Contracts.Auth.Responses;
+using SmaStamaFeedbackHub.Contracts.Requests.Auth;
+using SmaStamaFeedbackHub.Contracts.Responses.Auth;
 using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Auth;

@@ -1,4 +1,4 @@
-namespace SmaStamaFeedbackHub.Contracts.Feedback.Responses;
+namespace SmaStamaFeedbackHub.Contracts.Responses.Feedback;
 
 public class AdminFeedbackDto
 {
