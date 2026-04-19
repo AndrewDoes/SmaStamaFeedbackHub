@@ -1,5 +1,5 @@
 using FluentValidation;
-using SmaStamaFeedbackHub.Contracts.Auth.Requests;
+using SmaStamaFeedbackHub.Contracts.Requests.Auth;
     
 namespace SmaStamaFeedbackHub.Commons.Validators.Auth;
 

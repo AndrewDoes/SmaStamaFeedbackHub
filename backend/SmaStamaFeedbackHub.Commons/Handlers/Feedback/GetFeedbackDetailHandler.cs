@@ -38,6 +38,11 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
             throw new UnauthorizedAccessException("You do not have permission to view this feedback.");
         }
 
+        return MapToAdminDto(feedback);
+    }
+
+    private static AdminFeedbackDto MapToAdminDto(Entities.Feedback feedback)
+    {
         return new AdminFeedbackDto
         {
             Id = feedback.Id,
@@ -48,9 +53,8 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
             FlagReason = feedback.FlagReason,
             OwnerId = feedback.OwnerId,
             OwnerCode = feedback.Owner.Code,
-            OwnerFullName = feedback.Owner.FullName
+            OwnerFullName = feedback.Owner.FullName,
+            Replies = feedback.Replies.Select(MapToAdminDto).ToList()
         };
-        
-        // Note: In a complete implementation, this DTO would also include the collection of replies.
     }
 }

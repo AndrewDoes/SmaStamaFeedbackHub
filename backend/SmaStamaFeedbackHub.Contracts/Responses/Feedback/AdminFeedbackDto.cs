@@ -11,4 +11,5 @@ public class AdminFeedbackDto
     public Guid OwnerId { get; set; }
     public string OwnerCode { get; set; } = string.Empty;
     public string OwnerFullName { get; set; } = string.Empty;
+    public List<AdminFeedbackDto> Replies { get; set; } = new();
 }

@@ -23,6 +23,10 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
     public async Task<Guid> Handle(SubmitFeedbackCommand request, CancellationToken cancellationToken)
     {
         var isSafe = await _safetyFilter.IsContentSafeAsync(request.Title + " " + request.Content);
+        if (!isSafe)
+        {
+            throw new FluentValidation.ValidationException("Inappropriate content detected. Submission blocked.");
+        }
 
         var feedback = new Entities.Feedback
         {
@@ -31,8 +35,7 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
             Content = request.Content,
             CreatedAt = DateTime.UtcNow,
             OwnerId = _userContext.UserId,
-            IsFlagged = !isSafe,
-            FlagReason = isSafe ? null : "Automated: Forbidden words detected"
+            IsFlagged = false
         };
 
         _context.Feedbacks.Add(feedback);
