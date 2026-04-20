@@ -13,9 +13,18 @@ public class UserContext : IUserContext
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Guid UserId => Guid.Parse(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? Guid.Empty.ToString());
+    public Guid UserId => Guid.Parse(
+        _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? 
+        _httpContextAccessor.HttpContext?.User.FindFirstValue("sub") ?? 
+        Guid.Empty.ToString());
 
-    public UserRole Role => Enum.Parse<UserRole>(_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role) ?? UserRole.Student.ToString());
+    public UserRole Role => Enum.Parse<UserRole>(
+        _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role) ?? 
+        _httpContextAccessor.HttpContext?.User.FindFirstValue("role") ?? 
+        UserRole.Student.ToString());
 
-    public string Code => _httpContextAccessor.HttpContext?.User.FindFirstValue("Code") ?? string.Empty;
+    public string Code => 
+        _httpContextAccessor.HttpContext?.User.FindFirstValue("Code") ?? 
+        _httpContextAccessor.HttpContext?.User.FindFirstValue("code") ?? 
+        string.Empty;
 }

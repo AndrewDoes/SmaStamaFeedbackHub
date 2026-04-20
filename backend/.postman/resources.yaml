@@ -1,0 +1,15 @@
+# Use this workspace to collaborate
+workspace:
+  id: 46c36242-35f0-42e2-8893-de087327439e
+
+localResources:
+  specs:
+    - ..\SmaStamaFeedbackHub.WebAPI\obj\Debug\net10.0\EndpointInfo\SmaStamaFeedbackHub.WebAPI.json
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ..\postman\collections\SmaStamaFeedbackHub: 51325273-21eb3a46-8c9b-438a-9268-04d1d43ecc37
+  environments:
+    ..\postman\environments\SmaStamaFeedbackHub.environment.yaml: 51325273-b27f520b-b760-4408-b9ba-9f69006b062c

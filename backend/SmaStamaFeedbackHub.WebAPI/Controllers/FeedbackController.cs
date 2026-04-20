@@ -18,9 +18,9 @@ public class FeedbackController : ControllerBase
     }
 
     [HttpGet("GetFeedbackList")]
-    public async Task<IActionResult> GetList()
+    public async Task<IActionResult> GetList([FromQuery] GetFeedbackListQuery query)
     {
-        return Ok(await _mediator.Send(new GetFeedbackListQuery()));
+        return Ok(await _mediator.Send(query));
     }
 
     [HttpGet("GetFeedbackDetail")]
@@ -97,5 +97,23 @@ public class FeedbackController : ControllerBase
     {
         await _mediator.Send(new DeleteFeedbackCommand(id));
         return Ok(new { Success = true });
+    }
+
+    [HttpPatch("UpdateStatus")]
+    public async Task<IActionResult> UpdateStatus([FromBody] UpdateFeedbackStatusCommand command)
+    {
+        try
+        {
+            await _mediator.Send(command);
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

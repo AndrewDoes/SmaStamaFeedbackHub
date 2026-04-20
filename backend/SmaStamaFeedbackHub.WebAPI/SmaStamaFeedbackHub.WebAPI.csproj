@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmaStamaFeedbackHub.Commons\SmaStamaFeedbackHub.Commons.csproj" />
+    <ProjectReference Include="..\SmaStamaFeedbackHub.Entities\SmaStamaFeedbackHub.Entities.csproj" />
     <ProjectReference Include="..\SmaStamaFeedbackHub.Infrastructure\SmaStamaFeedbackHub.Infrastructure.csproj" />
     <ProjectReference Include="..\SmaStamaFeedbackHub.Contracts\SmaStamaFeedbackHub.Contracts.csproj" />
   </ItemGroup>

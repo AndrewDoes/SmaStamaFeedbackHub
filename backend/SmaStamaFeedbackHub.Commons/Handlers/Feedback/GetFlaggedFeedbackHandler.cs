@@ -5,9 +5,9 @@ using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 
-public class GetFlaggedFeedbackQuery : IRequest<List<AdminFeedbackDto>>;
+public class GetFlaggedFeedbackQuery : IRequest<List<FeedbackDto>>;
 
-public class GetFlaggedFeedbackHandler : IRequestHandler<GetFlaggedFeedbackQuery, List<AdminFeedbackDto>>
+public class GetFlaggedFeedbackHandler : IRequestHandler<GetFlaggedFeedbackQuery, List<FeedbackDto>>
 {
     private readonly AppDbContext _context;
 
@@ -16,25 +16,20 @@ public class GetFlaggedFeedbackHandler : IRequestHandler<GetFlaggedFeedbackQuery
         _context = context;
     }
 
-    public async Task<List<AdminFeedbackDto>> Handle(GetFlaggedFeedbackQuery request, CancellationToken cancellationToken)
+    public async Task<List<FeedbackDto>> Handle(GetFlaggedFeedbackQuery request, CancellationToken cancellationToken)
     {
         var flaggedItems = await _context.Feedbacks
-            .Include(f => f.Owner)
             .Where(f => f.IsFlagged)
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync(cancellationToken);
 
-        return flaggedItems.Select(f => new AdminFeedbackDto
+        return flaggedItems.Select(f => new FeedbackDto
         {
             Id = f.Id,
             Title = f.Title,
             Content = f.Content,
             CreatedAt = f.CreatedAt,
-            IsFlagged = f.IsFlagged,
-            FlagReason = f.FlagReason,
-            OwnerId = f.OwnerId,
-            OwnerCode = f.Owner.Code,
-            OwnerFullName = f.Owner.FullName
+            IsFlagged = f.IsFlagged
         }).ToList();
     }
 }

@@ -1,17 +1,18 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using SmaStamaFeedbackHub.Contracts.Responses.Feedback;
+using SmaStamaFeedbackHub.Contracts.Enums;
 using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 
-public class GetFeedbackDetailQuery : IRequest<AdminFeedbackDto>
+public class GetFeedbackDetailQuery : IRequest<FeedbackDto>
 {
     public Guid Id { get; set; }
     public GetFeedbackDetailQuery(Guid id) => Id = id;
 }
 
-public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, AdminFeedbackDto>
+public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, FeedbackDto>
 {
     private readonly AppDbContext _context;
     private readonly IUserContext _userContext;
@@ -22,12 +23,10 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
         _userContext = userContext;
     }
 
-    public async Task<AdminFeedbackDto> Handle(GetFeedbackDetailQuery request, CancellationToken cancellationToken)
+    public async Task<FeedbackDto> Handle(GetFeedbackDetailQuery request, CancellationToken cancellationToken)
     {
         var feedback = await _context.Feedbacks
-            .Include(f => f.Owner)
             .Include(f => f.Replies)
-                .ThenInclude(r => r.Owner)
             .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
 
         if (feedback == null) throw new KeyNotFoundException("Feedback not found.");
@@ -35,26 +34,23 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
         // Privacy Logic: Students can only see their own records
         if (_userContext.Role == UserRole.Student && feedback.OwnerId != _userContext.UserId)
         {
-            throw new UnauthorizedAccessException("You do not have permission to view this feedback.");
+            throw new UnauthorizedAccessException("Access Denied: You can only view your own feedback threads.");
         }
 
-        return MapToAdminDto(feedback);
+        return MapToDto(feedback);
     }
 
-    private static AdminFeedbackDto MapToAdminDto(Entities.Feedback feedback)
+    private static FeedbackDto MapToDto(Entities.Feedback feedback)
     {
-        return new AdminFeedbackDto
+        return new FeedbackDto
         {
             Id = feedback.Id,
             Title = feedback.Title,
             Content = feedback.Content,
             CreatedAt = feedback.CreatedAt,
             IsFlagged = feedback.IsFlagged,
-            FlagReason = feedback.FlagReason,
-            OwnerId = feedback.OwnerId,
-            OwnerCode = feedback.Owner.Code,
-            OwnerFullName = feedback.Owner.FullName,
-            Replies = feedback.Replies.Select(MapToAdminDto).ToList()
+            Status = feedback.Status,
+            Replies = feedback.Replies.Select(MapToDto).ToList()
         };
     }
 }

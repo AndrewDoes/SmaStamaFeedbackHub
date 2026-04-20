@@ -9,6 +9,7 @@ using SmaStamaFeedbackHub.Commons.Handlers.Auth;
 using SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 using SmaStamaFeedbackHub.Entities;
 using SmaStamaFeedbackHub.Infrastructure;
+using SmaStamaFeedbackHub.Infrastructure.Services;
 using SmaStamaFeedbackHub.WebAPI;
 using System.Text;
 
@@ -29,8 +30,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateIssuer = !string.IsNullOrEmpty(builder.Configuration["Jwt:Issuer"]),
+            ValidateAudience = !string.IsNullOrEmpty(builder.Configuration["Jwt:Audience"]),
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
@@ -54,6 +55,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<ISafetyFilter, ForbiddenWordsService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddHostedService<DeactivationBackgroundService>();
 
 var app = builder.Build();
 

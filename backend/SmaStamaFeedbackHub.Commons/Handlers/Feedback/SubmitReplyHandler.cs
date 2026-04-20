@@ -1,23 +1,24 @@
 using MediatR;
-using SmaStamaFeedbackHub.Commons;
+using SmaStamaFeedbackHub.Commons.Behaviors;
 using SmaStamaFeedbackHub.Contracts.Requests.Feedback;
 using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 
-public class SubmitReplyCommand : ReplyToFeedbackRequest, IRequest<Guid>;
+public class SubmitReplyCommand : ReplyToFeedbackRequest, IRequest<Guid>, ISafeRequest
+{
+    public string Title => ""; // Replies don't have titles
+}
 
 public class SubmitReplyHandler : IRequestHandler<SubmitReplyCommand, Guid>
 {
     private readonly AppDbContext _context;
     private readonly IUserContext _userContext;
-    private readonly ISafetyFilter _safetyFilter;
 
-    public SubmitReplyHandler(AppDbContext context, IUserContext userContext, ISafetyFilter safetyFilter)
+    public SubmitReplyHandler(AppDbContext context, IUserContext userContext)
     {
         _context = context;
         _userContext = userContext;
-        _safetyFilter = safetyFilter;
     }
 
     public async Task<Guid> Handle(SubmitReplyCommand request, CancellationToken cancellationToken)
@@ -26,12 +27,7 @@ public class SubmitReplyHandler : IRequestHandler<SubmitReplyCommand, Guid>
         var parent = await _context.Feedbacks.FindAsync(request.ParentId);
         if (parent == null) throw new KeyNotFoundException("The feedback you are replying to does not exist.");
 
-        // 2. Safety filtering
-        var isSafe = await _safetyFilter.IsContentSafeAsync(request.Content);
-        if (!isSafe)
-        {
-            throw new FluentValidation.ValidationException("Inappropriate content detected. Reply blocked.");
-        }
+        if (parent == null) throw new KeyNotFoundException("The feedback you are replying to does not exist.");
 
         // 3. Create reply (which is just a Feedback with a ParentId)
         var reply = new Entities.Feedback

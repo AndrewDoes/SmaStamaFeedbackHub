@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<ForbiddenWord> ForbiddenWords => Set<ForbiddenWord>();
+    public DbSet<SystemMetadata> SystemMetadata => Set<SystemMetadata>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

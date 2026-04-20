@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using SmaStamaFeedbackHub.Contracts.Enums;
+using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Entities;
 
@@ -24,4 +26,6 @@ public class Feedback
 
     public bool IsFlagged { get; set; }
     public string? FlagReason { get; set; }
+
+    public FeedbackStatus Status { get; set; } = FeedbackStatus.Open;
 }

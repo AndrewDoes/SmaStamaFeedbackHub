@@ -1,0 +1,6 @@
+name: SmaStamaFeedbackHub
+values:
+  - key: SmaStamaFeedback
+    value: ""
+    enabled: true
+color: null

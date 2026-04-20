@@ -29,6 +29,11 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
             throw new UnauthorizedAccessException("Invalid code or password.");
         }
 
+        if (!user.IsActive)
+        {
+            throw new UnauthorizedAccessException("Your account has been deactivated. Please contact the administration.");
+        }
+
         var token = _jwtService.GenerateToken(user);
 
         return new LoginResponse

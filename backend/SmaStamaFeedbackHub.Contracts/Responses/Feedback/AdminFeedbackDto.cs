@@ -1,3 +1,5 @@
+using SmaStamaFeedbackHub.Contracts.Enums;
+
 namespace SmaStamaFeedbackHub.Contracts.Responses.Feedback;
 
 public class AdminFeedbackDto
@@ -7,6 +9,7 @@ public class AdminFeedbackDto
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public bool IsFlagged { get; set; }
+    public FeedbackStatus Status { get; set; }
     public string? FlagReason { get; set; }
     public Guid OwnerId { get; set; }
     public string OwnerCode { get; set; } = string.Empty;
