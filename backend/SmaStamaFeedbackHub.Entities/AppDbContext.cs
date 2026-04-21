@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<ForbiddenWord> ForbiddenWords => Set<ForbiddenWord>();
     public DbSet<SystemMetadata> SystemMetadata => Set<SystemMetadata>();
     public DbSet<FeedbackAttachment> Attachments => Set<FeedbackAttachment>();
+    public DbSet<FeedbackLog> FeedbackLogs => Set<FeedbackLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -22,5 +23,15 @@ public class AppDbContext : DbContext
             .HasOne(f => f.Owner)
             .WithMany(u => u.Feedbacks)
             .HasForeignKey(f => f.OwnerId);
+
+        modelBuilder.Entity<FeedbackLog>()
+            .HasOne(l => l.Feedback)
+            .WithMany()
+            .HasForeignKey(l => l.FeedbackId);
+
+        modelBuilder.Entity<FeedbackLog>()
+            .HasOne(l => l.Admin)
+            .WithMany()
+            .HasForeignKey(l => l.AdminId);
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SmaStamaFeedbackHub.Entities;
@@ -11,9 +12,11 @@ using SmaStamaFeedbackHub.Entities;
 namespace SmaStamaFeedbackHub.Entities.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260421201755_AddFeedbackCategory")]
+    partial class AddFeedbackCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,42 +94,6 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
                     b.HasIndex("FeedbackId");
 
                     b.ToTable("Attachments");
-                });
-
-            modelBuilder.Entity("SmaStamaFeedbackHub.Entities.FeedbackLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("AdminId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("FeedbackId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("NewValue")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("OldValue")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AdminId");
-
-                    b.HasIndex("FeedbackId");
-
-                    b.ToTable("FeedbackLogs");
                 });
 
             modelBuilder.Entity("SmaStamaFeedbackHub.Entities.ForbiddenWord", b =>
@@ -218,25 +185,6 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
                         .HasForeignKey("FeedbackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Feedback");
-                });
-
-            modelBuilder.Entity("SmaStamaFeedbackHub.Entities.FeedbackLog", b =>
-                {
-                    b.HasOne("SmaStamaFeedbackHub.Entities.User", "Admin")
-                        .WithMany()
-                        .HasForeignKey("AdminId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SmaStamaFeedbackHub.Entities.Feedback", "Feedback")
-                        .WithMany()
-                        .HasForeignKey("FeedbackId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Admin");
 
                     b.Navigation("Feedback");
                 });

@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+:root {
+  /* High-Performance Branding Palette - Light Mode */
+  --background: #FDFBF7;
+  /* Warm Cream */
+  --foreground: #1A4B5D;
+  /* Deep Blue / Teal */
+
+  --color-primary: #1A4B5D;
+  --color-secondary: #C5A059;
+  /* Gold */
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F4F4F4;
+
+  --color-text-main: #1A4B5D;
+  --color-text-body: #333333;
+  --color-text-muted: #666666;
+
+  --color-error: #D32F2F;
+  --color-error-bg: #FFEBEE;
+  
+  --color-success: #10B981;
+  --color-success-bg: #ECFDF5;
+  
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FFFBEB;
+
+  --card-shadow: 0 4px 20px -2px rgba(26, 75, 93, 0.1);
+  --color-white: #FFFFFF;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Reflective Dark Mode - Deep Teal based */
+    --background: #0F2D39;
+    --foreground: #FDFBF7;
+
+    --color-primary: #2D7D9A;
+    --color-secondary: #D4B374;
+    --color-surface: #1A4B5D;
+    --color-surface-soft: #123644;
+
+    --color-text-main: #FDFBF7;
+    --color-text-body: #D1D1D1;
+    --color-text-muted: #888888;
+
+    --color-error: #FF5252;
+    --color-error-bg: #2D0F0F;
+
+    --color-success: #34D399;
+    --color-success-bg: #064E3B;
+
+    --color-warning: #FBBF24;
+    --color-warning-bg: #451A03;
+
+    --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.4);
+    --color-white: #000000;
+    /* In dark mode, 'white' tokens might flip or stay depending on usage, but let's use semantic names */
+  }
+}
+
+@theme {
+  /* Map CSS variables to Tailwind utilities */
+  --color-brand-background: var(--background);
+  --color-brand-foreground: var(--foreground);
+  --color-brand-primary: var(--color-primary);
+  --color-brand-secondary: var(--color-secondary);
+  --color-brand-surface: var(--color-surface);
+  --color-brand-surface-soft: var(--color-surface-soft);
+  --color-brand-text-main: var(--color-text-main);
+  --color-brand-text-body: var(--color-text-body);
+  --color-brand-text-muted: var(--color-text-muted);
+
+  --color-brand-error: var(--color-error);
+  --color-brand-error-bg: var(--color-error-bg);
+
+  --color-brand-success: var(--color-success);
+  --color-brand-success-bg: var(--color-success-bg);
+
+  --color-brand-warning: var(--color-warning);
+  --color-brand-warning-bg: var(--color-warning-bg);
+
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+
+  --shadow-premium: var(--card-shadow);
+}
+
+body {
+  background: var(--background);
+  color: var(--color-text-body);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+  color: var(--color-text-main);
+  font-weight: 700;
+}

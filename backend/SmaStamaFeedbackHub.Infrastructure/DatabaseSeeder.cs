@@ -5,7 +5,7 @@ namespace SmaStamaFeedbackHub.Infrastructure;
 
 public static class DatabaseSeeder
 {
-    private const int CURRENT_SEED_VERSION = 8;
+    private const int CURRENT_SEED_VERSION = 9;
 
     public static async Task SeedAsync(AppDbContext context)
     {
@@ -34,7 +34,8 @@ public static class DatabaseSeeder
                 FullName = "System Administrator",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
                 Role = UserRole.Administrator,
-                IsActive = true
+                IsActive = true,
+                MustChangePassword = true
             };
 
             var student1 = new User
@@ -45,7 +46,8 @@ public static class DatabaseSeeder
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
                 Role = UserRole.Student,
                 BatchYear = 2023,
-                IsActive = true
+                IsActive = true,
+                MustChangePassword = true
             };
 
             var student2 = new User
@@ -56,7 +58,8 @@ public static class DatabaseSeeder
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
                 Role = UserRole.Student,
                 BatchYear = 2023,
-                IsActive = true
+                IsActive = true,
+                MustChangePassword = true
             };
 
             var oldStudent = new User
@@ -67,7 +70,8 @@ public static class DatabaseSeeder
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
                 Role = UserRole.Student,
                 BatchYear = 2020,
-                IsActive = true
+                IsActive = true,
+                MustChangePassword = true
             };
 
             context.Users.AddRange(admin, student1, student2, oldStudent);
