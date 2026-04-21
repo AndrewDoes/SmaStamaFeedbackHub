@@ -31,12 +31,13 @@ public class FeedbackController : ControllerBase
 
     [Authorize]
     [HttpPost("SubmitFeedback")]
-    public async Task<IActionResult> Submit([FromBody] CreateFeedbackRequest request)
+    public async Task<IActionResult> Submit([FromForm] CreateFeedbackRequest request, [FromForm] List<IFormFile>? proofs)
     {
         var command = new SubmitFeedbackCommand
         {
             Title = request.Title,
-            Content = request.Content
+            Content = request.Content,
+            Proofs = proofs
         };
 
         var id = await _mediator.Send(command);

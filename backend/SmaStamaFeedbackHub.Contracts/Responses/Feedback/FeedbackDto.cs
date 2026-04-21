@@ -11,4 +11,5 @@ public class FeedbackDto
     public bool IsFlagged { get; set; }
     public FeedbackStatus Status { get; set; }
     public List<FeedbackDto> Replies { get; set; } = new();
+    public List<string> AttachmentUrls { get; set; } = new();
 }

@@ -10,6 +10,7 @@ using SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 using SmaStamaFeedbackHub.Entities;
 using SmaStamaFeedbackHub.Infrastructure;
 using SmaStamaFeedbackHub.Infrastructure.Services;
+using SmaStamaFeedbackHub.Commons.Services;
 using SmaStamaFeedbackHub.WebAPI;
 using System.Text;
 
@@ -55,6 +56,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<ISafetyFilter, ForbiddenWordsService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IStorageService, AzureBlobStorageService>();
 builder.Services.AddHostedService<DeactivationBackgroundService>();
 
 var app = builder.Build();

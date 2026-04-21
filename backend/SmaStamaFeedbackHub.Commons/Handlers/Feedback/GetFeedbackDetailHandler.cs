@@ -27,6 +27,7 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
     {
         var feedback = await _context.Feedbacks
             .Include(f => f.Replies)
+            .Include(f => f.Attachments)
             .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
 
         if (feedback == null) throw new KeyNotFoundException("Feedback not found.");
@@ -50,7 +51,8 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
             CreatedAt = feedback.CreatedAt,
             IsFlagged = feedback.IsFlagged,
             Status = feedback.Status,
-            Replies = feedback.Replies.Select(MapToDto).ToList()
+            Replies = feedback.Replies.Select(MapToDto).ToList(),
+            AttachmentUrls = feedback.Attachments.Select(a => a.BlobUrl).ToList()
         };
     }
 }
