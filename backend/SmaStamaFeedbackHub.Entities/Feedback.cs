@@ -28,4 +28,6 @@ public class Feedback
     public string? FlagReason { get; set; }
 
     public FeedbackStatus Status { get; set; } = FeedbackStatus.Open;
+
+    public List<FeedbackAttachment> Attachments { get; set; } = new();
 }

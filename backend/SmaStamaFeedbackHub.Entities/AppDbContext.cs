@@ -10,6 +10,7 @@ public class AppDbContext : DbContext
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<ForbiddenWord> ForbiddenWords => Set<ForbiddenWord>();
     public DbSet<SystemMetadata> SystemMetadata => Set<SystemMetadata>();
+    public DbSet<FeedbackAttachment> Attachments => Set<FeedbackAttachment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
