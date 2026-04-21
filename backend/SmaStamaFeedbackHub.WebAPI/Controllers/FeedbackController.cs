@@ -44,7 +44,7 @@ public class FeedbackController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("Reply")]
+    [HttpPost("SubmitReply")]
     public async Task<IActionResult> Reply([FromBody] ReplyToFeedbackRequest request)
     {
         var command = new SubmitReplyCommand
