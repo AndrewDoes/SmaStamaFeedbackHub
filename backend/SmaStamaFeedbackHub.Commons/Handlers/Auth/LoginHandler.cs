@@ -40,7 +40,10 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
         {
             Token = token,
             Role = user.Role.ToString(),
-            FullName = user.FullName
+            FullName = user.FullName,
+            MustChangePassword = user.MustChangePassword,
+            UserId = user.Id,
+            Code = user.Code
         };
     }
 }

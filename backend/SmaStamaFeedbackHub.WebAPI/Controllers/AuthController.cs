@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmaStamaFeedbackHub.Commons.Handlers.Auth;
 using SmaStamaFeedbackHub.Contracts.Requests.Auth;
@@ -33,6 +34,36 @@ public class AuthController : ControllerBase
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(ex.Message);
+        }
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        try
+        {
+            var command = new ChangePasswordCommand
+            {
+                OldPassword = request.OldPassword,
+                NewPassword = request.NewPassword,
+                ConfirmPassword = request.ConfirmPassword
+            };
+
+            await _mediator.Send(command);
+            return Ok(new { Success = true });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { Message = ex.Message });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
         }
     }
 }

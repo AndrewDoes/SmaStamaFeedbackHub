@@ -12,6 +12,7 @@ public class GetFeedbackListQuery : IRequest<PagedResult<FeedbackDto>>
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public string? Search { get; set; }
+    public FeedbackStatus? Status { get; set; }
 }
 
 public class GetFeedbackListHandler : IRequestHandler<GetFeedbackListQuery, PagedResult<FeedbackDto>>
@@ -44,12 +45,23 @@ public class GetFeedbackListHandler : IRequestHandler<GetFeedbackListQuery, Page
             query = query.Where(f => f.OwnerId == _userContext.UserId);
         }
 
+        // 3. Status Filter
+        if (request.Status.HasValue)
+        {
+            query = query.Where(f => f.Status == request.Status.Value);
+        }
+
         // 3. Count Total before paging
         var totalCount = await query.CountAsync(cancellationToken);
 
-        // 4. Apply Pagination
-        var items = await query
-            .OrderByDescending(f => f.CreatedAt)
+        // 4. Apply Role-Based Sorting & Pagination
+        // Admins get FIFO (Oldest First) for queue clearing.
+        // Students get LIFO (Newest First) for recent updates.
+        var orderedQuery = _userContext.Role == UserRole.Administrator
+            ? query.OrderBy(f => f.CreatedAt)
+            : query.OrderByDescending(f => f.CreatedAt);
+
+        var items = await orderedQuery
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(f => new FeedbackDto
@@ -59,7 +71,8 @@ public class GetFeedbackListHandler : IRequestHandler<GetFeedbackListQuery, Page
                 Content = f.Content,
                 CreatedAt = f.CreatedAt,
                 IsFlagged = f.IsFlagged,
-                Status = f.Status
+                Status = f.Status,
+                Category = f.Category
             })
             .ToListAsync(cancellationToken);
 

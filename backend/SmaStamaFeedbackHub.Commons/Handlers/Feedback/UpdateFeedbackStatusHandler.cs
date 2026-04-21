@@ -35,8 +35,22 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
             throw new KeyNotFoundException("Feedback record not found.");
         }
 
-        // 2. Apply status change
+        // 2. Record transition for auditing
+        var oldStatus = feedback.Status;
+        
+        // 3. Apply status change
         feedback.Status = request.Status;
+
+        _context.FeedbackLogs.Add(new FeedbackLog
+        {
+            Id = Guid.NewGuid(),
+            FeedbackId = feedback.Id,
+            AdminId = _userContext.UserId,
+            Action = "StatusUpdate",
+            OldValue = oldStatus.ToString(),
+            NewValue = request.Status.ToString(),
+            CreatedAt = DateTime.UtcNow
+        });
         
         await _context.SaveChangesAsync(cancellationToken);
     }

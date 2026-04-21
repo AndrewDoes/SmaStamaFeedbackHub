@@ -26,7 +26,9 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
     public async Task<FeedbackDto> Handle(GetFeedbackDetailQuery request, CancellationToken cancellationToken)
     {
         var feedback = await _context.Feedbacks
+            .Include(f => f.Owner)
             .Include(f => f.Replies)
+                .ThenInclude(r => r.Owner)
             .Include(f => f.Attachments)
             .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
 
@@ -41,18 +43,29 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
         return MapToDto(feedback);
     }
 
-    private static FeedbackDto MapToDto(Entities.Feedback feedback)
+    private FeedbackDto MapToDto(Entities.Feedback item)
     {
+        bool isStaff = item.Owner?.Role == UserRole.Administrator;
+        bool isOwner = item.OwnerId == _userContext.UserId;
+        
+        // True Anonymity Logic:
+        // Mask the Student Name for everyone EXCEPT the staff.
+        string maskedAuthorName = isStaff ? (item.Owner?.FullName ?? "Staff") : "Student Contributor";
+
         return new FeedbackDto
         {
-            Id = feedback.Id,
-            Title = feedback.Title,
-            Content = feedback.Content,
-            CreatedAt = feedback.CreatedAt,
-            IsFlagged = feedback.IsFlagged,
-            Status = feedback.Status,
-            Replies = feedback.Replies.Select(MapToDto).ToList(),
-            AttachmentUrls = feedback.Attachments.Select(a => a.BlobUrl).ToList()
+            Id = item.Id,
+            Title = item.Title,
+            Content = item.Content,
+            CreatedAt = item.CreatedAt,
+            IsFlagged = item.IsFlagged,
+            Status = item.Status,
+            Category = item.Category,
+            IsStaffResponse = isStaff,
+            IsAuthor = isOwner,
+            AuthorName = maskedAuthorName,
+            Replies = item.Replies.OrderBy(r => r.CreatedAt).Select(r => MapToDto(r)).ToList(),
+            AttachmentUrls = item.Attachments.Select(a => a.BlobUrl).ToList()
         };
     }
 }

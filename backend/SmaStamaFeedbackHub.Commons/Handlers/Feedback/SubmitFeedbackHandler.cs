@@ -35,7 +35,8 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
             Content = request.Content,
             CreatedAt = DateTime.UtcNow,
             OwnerId = _userContext.UserId,
-            IsFlagged = false
+            IsFlagged = false,
+            Category = request.Category
         };
 
         // Handle Proofs / Attachments

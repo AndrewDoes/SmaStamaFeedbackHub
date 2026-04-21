@@ -28,4 +28,5 @@ public class User
     public bool IsActive { get; set; } = true;
     
     public List<Feedback> Feedbacks { get; set; } = new();
+    public bool MustChangePassword {get; set; } = true;
 }

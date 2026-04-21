@@ -10,6 +10,10 @@ public class FeedbackDto
     public DateTime CreatedAt { get; set; }
     public bool IsFlagged { get; set; }
     public FeedbackStatus Status { get; set; }
+    public FeedbackCategory Category { get; set; }
     public List<FeedbackDto> Replies { get; set; } = new();
     public List<string> AttachmentUrls { get; set; } = new();
+    public bool IsStaffResponse { get; set; }
+    public string AuthorName { get; set; } = string.Empty;
+    public bool IsAuthor { get; set; }
 }
