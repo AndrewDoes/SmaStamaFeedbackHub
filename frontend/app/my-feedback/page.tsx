@@ -71,12 +71,12 @@ export default function MyFeedbackPage() {
                 <h3 className="text-xl font-bold text-brand-text-main group-hover:text-brand-primary transition-colors mb-1">{item.title}</h3>
                 <p className="text-xs text-brand-text-body/40 font-medium italic">Submitted on {new Date(item.createdAt).toLocaleDateString()}</p>
               </div>
-              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${item.status === 2 ? "bg-brand-success/10 text-brand-success border-brand-success/20" :
-                  item.status === 1 ? "bg-brand-warning/10 text-brand-warning border-brand-warning/20" :
-                    item.status === 3 ? "bg-brand-text-body/10 text-brand-text-body/40 border-brand-text-body/10" :
-                      "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
+              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${item.status === 2 ? item.isDenied ? "bg-brand-error/10 text-brand-error border-brand-error/20" : "bg-brand-success/10 text-brand-success border-brand-success/20" :
+                item.status === 1 ? "bg-brand-warning/10 text-brand-warning border-brand-warning/20" :
+                  item.status === 3 ? "bg-brand-text-body/10 text-brand-text-body/40 border-brand-text-body/10" :
+                    "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
                 }`}>
-                {item.status === 2 ? "Resolved" : item.status === 1 ? "In Progress" : item.status === 3 ? "Closed" : "Open"}
+                {item.status === 2 ? (item.isDenied ? "Denied" : "Resolved") : item.status === 1 ? "In Progress" : item.status === 3 ? "Closed" : "Open"}
               </span>
             </div>
             <p className="text-brand-text-body/70 text-sm leading-relaxed line-clamp-2">

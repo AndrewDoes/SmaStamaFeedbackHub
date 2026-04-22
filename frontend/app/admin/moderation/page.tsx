@@ -89,7 +89,8 @@ export default function ModerationHubPage() {
       ) : (
         <div className="flex-1 min-h-0 bg-brand-surface rounded-[32px] border border-brand-error/10 shadow-premium flex flex-col overflow-hidden">
           <div className="flex-1 overflow-auto no-scrollbar relative">
-            <table className="w-full text-left border-separate border-spacing-0 min-w-[900px]">
+            {/* Desktop Table View */}
+            <table className="w-full text-left border-separate border-spacing-0 min-w-[900px] hidden md:table">
               <thead className="sticky top-0 z-20">
                 <tr className="bg-brand-background/80 backdrop-blur-md">
                   <th className="pl-10 pr-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-error/5">Flagged User</th>
@@ -160,6 +161,60 @@ export default function ModerationHubPage() {
                 )}
               </tbody>
             </table>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col divide-y divide-brand-error/[0.03]">
+               {(!flaggedItems || flaggedItems.length === 0) ? (
+                  <div className="py-24 text-center">
+                     <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/20 italic">No violations flags active</p>
+                  </div>
+               ) : (
+                  flaggedItems.map((item: FeedbackDto) => (
+                    <div key={item.id} className="p-6 space-y-4 hover:bg-brand-error/[0.01]">
+                       <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-3">
+                             <div className="w-8 h-8 rounded-lg bg-brand-error/5 flex items-center justify-center font-black text-brand-error text-[10px]">
+                                {item.authorName?.charAt(0) || "S"}
+                             </div>
+                             <div>
+                                <p className="font-bold text-brand-text-main text-xs">{item.authorName || "Contributor"}</p>
+                                <p className="text-[8px] font-medium text-brand-text-body/30 uppercase tracking-widest">
+                                   {new Date(item.createdAt).toLocaleDateString()}
+                                </p>
+                             </div>
+                          </div>
+                          <span className="px-2 py-0.5 bg-brand-error/10 text-brand-error text-[7px] font-black uppercase rounded">Flagged</span>
+                       </div>
+
+                       <div className="p-3 bg-brand-background rounded-xl border border-brand-error/5">
+                          <p className="text-xs font-bold text-brand-text-main mb-1">{item.title}</p>
+                          <p className="text-[10px] text-brand-text-body/60 italic line-clamp-2">"{item.content}"</p>
+                       </div>
+
+                       <div className="flex items-center justify-between">
+                          <span className="px-2 py-0.5 bg-brand-background border border-brand-error/5 rounded text-[8px] font-black uppercase text-brand-text-body/40">
+                             {getCategoryName(item.category)}
+                          </span>
+                          <div className="flex gap-2">
+                             <button
+                                onClick={() => router.push(`/feedback/${item.id}`)}
+                                className="px-3 py-1.5 bg-brand-background border border-brand-primary/5 text-brand-primary text-[8px] font-black uppercase tracking-widest rounded-lg"
+                             >
+                                Audit
+                             </button>
+                             <button
+                                onClick={() => resolveMutation.mutate(item.id)}
+                                disabled={resolveMutation.isPending}
+                                className="px-3 py-1.5 bg-brand-error text-brand-background text-[8px] font-black uppercase tracking-widest rounded-lg"
+                             >
+                                Resolve
+                             </button>
+                          </div>
+                       </div>
+                    </div>
+                  ))
+               )}
+            </div>
           </div>
 
           <div className="p-4 border-t border-brand-error/5 bg-brand-error/[0.01] flex justify-between items-center shrink-0">

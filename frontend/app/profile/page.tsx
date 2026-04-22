@@ -53,8 +53,8 @@ export default function ProfilePage() {
       {/* Refined Header */}
       <header className="relative pb-6 border-b border-brand-primary/10">
         <div className="relative z-10">
-          <h1 className="text-3xl font-black text-brand-text-main tracking-tighter mb-2 italic">
-            Dashboard<span className="text-brand-primary">.</span>Profile
+          <h1 className="text-4xl font-black text-brand-text-main tracking-tighter mb-2">
+            Dashboard<span className="text-brand-primary"> </span>Profile
           </h1>
           <div className="flex flex-wrap items-center gap-3">
             <div className="px-3 py-1 bg-brand-primary/10 text-brand-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-primary/10">

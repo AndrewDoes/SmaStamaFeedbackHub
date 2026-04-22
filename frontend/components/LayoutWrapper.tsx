@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
 import Image from "next/image";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -29,7 +30,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-brand-surface/80 backdrop-blur-md border-b border-brand-primary/5 z-40 px-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Image src={'https://stamayk.sch.id/icons/logostamayk.svg'} alt="Logo" width={32} height={32} className="rounded-lg" />
-              <span className="font-black text-brand-text-main tracking-tighter">Stama Listen</span>
+              <span className="font-black text-brand-text-main tracking-tighter">SMA Santa Maria Yogyakarta</span>
             </div>
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -42,10 +43,11 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           </div>
 
           <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+          <Topbar />
         </>
       )}
 
-      <main className={`flex-1 min-h-screen transition-all duration-300 ${isLoginPage || isForceChangePage ? "ml-0" : "ml-0 lg:ml-64 pt-16 lg:pt-0"
+      <main className={`flex-1 min-h-screen transition-all duration-300 ${isLoginPage || isForceChangePage ? "ml-0" : "ml-0 lg:ml-64 pt-16 lg:pt-20"
         }`}>
         <div className="p-4 md:p-8">
           {children}

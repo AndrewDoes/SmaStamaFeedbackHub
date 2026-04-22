@@ -12,7 +12,7 @@ export default function LandingPage() {
   const [isChecking, setIsChecking] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userName, setUserName] = useState("");
-  const [activeFilter, setActiveFilter] = useState<number | null>(null);
+  const [activeFilter, setActiveFilter] = useState<number>(0);
 
   useEffect(() => {
     if (!authService.isAuthenticated()) {
@@ -31,8 +31,8 @@ export default function LandingPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["feedbacks", activeFilter],
     queryFn: () => feedbackService.getFeedbacks({
-      status: (activeFilter === 0 || activeFilter === 1) ? activeFilter : undefined,
-      isHistory: activeFilter === 2 || activeFilter === 3 || activeFilter === null,
+      status: activeFilter,
+      isHistory: activeFilter === 2,
       pageSize: 100
     }),
     enabled: !isChecking,
@@ -84,16 +84,16 @@ export default function LandingPage() {
               {isLoading && <span className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></span>}
             </h2>
             <div className="flex gap-1 bg-brand-background p-1 rounded-xl border border-brand-primary/5 w-full sm:w-auto overflow-x-auto no-scrollbar">
-              {[null, 0, 1, 2, 3].map((f) => (
+              {[0, 1, 2].map((f) => (
                 <button
                   key={String(f)}
                   onClick={() => setActiveFilter(f)}
-                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-tight transition-all ${activeFilter === f
+                  className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all ${activeFilter === f
                     ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20"
                     : "text-brand-text-body/40 hover:text-brand-text-body/60"
                     }`}
                 >
-                  {f === null ? "All" : f === 0 ? "Open" : f === 1 ? "In Progress" : f === 2 ? "Resolved" : "Closed"}
+                  {f === 0 ? "Active" : f === 1 ? "In Progress" : "Resolved"}
                 </button>
               ))}
             </div>
@@ -123,12 +123,11 @@ export default function LandingPage() {
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tighter border ${getCategoryDetails(fb.category).color}`}>
                           {getCategoryDetails(fb.category).label}
                         </span>
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tighter border ${fb.status === 2 ? "bg-brand-success/10 text-brand-success border-brand-success/20" :
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tighter border ${fb.status === 2 ? (fb.isDenied ? "bg-brand-text-body/10 text-brand-text-body/60 border-brand-text-body/20" : "bg-brand-success/10 text-brand-success border-brand-success/20") :
                           fb.status === 1 ? "bg-brand-warning/10 text-brand-warning border-brand-warning/20" :
-                            fb.status === 3 ? "bg-brand-text-body/10 text-brand-text-body/60 border-brand-text-body/20" :
-                              "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
+                            "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
                           }`}>
-                          {fb.status === 2 ? "Resolved" : fb.status === 1 ? "In Progress" : fb.status === 3 ? "Closed" : "Open"}
+                          {fb.status === 2 ? (fb.isDenied ? "Denied" : "Resolved") : fb.status === 1 ? "In Progress" : "Active"}
                         </span>
                         <span className="text-xs text-brand-text-body/50">
                           {new Date(fb.createdAt).toLocaleDateString()}

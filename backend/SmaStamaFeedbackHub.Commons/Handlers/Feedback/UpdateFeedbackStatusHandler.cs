@@ -8,6 +8,8 @@ public class UpdateFeedbackStatusCommand : IRequest
 {
     public Guid Id { get; set; }
     public FeedbackStatus Status { get; set; }
+    public string? Resolution { get; set; }
+    public bool? IsDenied { get; set; }
 }
 
 public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusCommand>
@@ -40,6 +42,18 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
         
         // 3. Apply status change
         feedback.Status = request.Status;
+
+        // 4. Handle Resolution
+        if (request.Status == FeedbackStatus.Resolved)
+        {
+            if (string.IsNullOrWhiteSpace(request.Resolution))
+            {
+                throw new ArgumentException("A resolution message is required when marking feedback as resolved.");
+            }
+            feedback.Resolution = request.Resolution;
+            feedback.ResolvedAt = DateTime.UtcNow;
+            feedback.IsDenied = request.IsDenied ?? false;
+        }
 
         _context.FeedbackLogs.Add(new FeedbackLog
         {

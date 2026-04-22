@@ -43,21 +43,29 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean, onClose
         />
       )}
 
-      <aside className={`fixed top-0 h-full w-64 bg-brand-surface p-6 flex flex-col z-50 transition-transform duration-300 
+      <aside className={`fixed top-0 lg:top-20 h-full lg:h-[calc(100vh-80px)] w-64 bg-brand-surface p-6 flex flex-col z-40 transition-transform duration-300 
         lg:left-0 lg:right-auto lg:border-r lg:translate-x-0 border-brand-primary/5
         ${isOpen
           ? "translate-x-0 right-0 border-l"
           : "translate-x-full right-0 border-l lg:translate-x-0"
         }`}>
-        <div className="mb-4 px-2">
+        <div className="mb-4 px-2 lg:hidden">
           <div className="flex items-center gap-3">
             <Image src={'https://stamayk.sch.id/icons/logostamayk.svg'} alt="Logo" width={32} height={32} className="rounded-lg" />
-            <span className="font-black text-xl text-brand-text-main tracking-tighter">Stama <span className="text-brand-primary">Listen</span></span>
+            <span className="font-black text-xl text-brand-text-main tracking-tighter">STAMA Listen</span>
           </div>
         </div>
 
+        {/* Desktop App Name */}
+        <div className="hidden lg:block mb-8 px-4 pb-6 border-b border-brand-primary text-center">
+          <h2 className="text-xl font-black text-brand-text-main tracking-tighter uppercase">
+            Stama<span className="text-brand-primary"> </span>Listen
+          </h2>
+          <p className="text-[8px] font-black uppercase tracking-widest text-brand-text-body/20 mt-1">Feedback Hub v1.0</p>
+        </div>
 
-        <div className="mb-8 px-4 py-3 bg-brand-primary/5 rounded-2xl flex items-center gap-3">
+
+        <div className="mb-8 px-4 py-3 bg-brand-primary/5 rounded-2xl flex items-center gap-3 lg:hidden">
           <div className="w-8 h-8 rounded-full bg-brand-secondary flex items-center justify-center text-brand-background font-black text-xs">
             {name.charAt(0)}
           </div>

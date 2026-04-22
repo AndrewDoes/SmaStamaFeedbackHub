@@ -11,6 +11,9 @@ public class FeedbackDto
     public bool IsFlagged { get; set; }
     public FeedbackStatus Status { get; set; }
     public FeedbackCategory Category { get; set; }
+    public string? Resolution { get; set; }
+    public DateTime? ResolvedAt { get; set; }
+    public bool IsDenied { get; set; }
     public List<FeedbackDto> Replies { get; set; } = new();
     public List<string> AttachmentUrls { get; set; } = new();
     public bool IsStaffResponse { get; set; }

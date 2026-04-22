@@ -23,6 +23,9 @@ export interface FeedbackDto {
   isStaffResponse: boolean;
   authorName: string;
   isAuthor: boolean;
+  resolution?: string;
+  resolvedAt?: string;
+  isDenied: boolean;
 }
 
 export interface PagedResult<T> {
@@ -78,8 +81,8 @@ export const feedbackService = {
     return response.data;
   },
 
-  updateFeedbackStatus: async (id: string, status: number): Promise<void> => {
-    await api.patch("/Feedback/UpdateStatus", { Id: id, Status: status });
+  updateFeedbackStatus: async (id: string, status: number, resolution?: string, isDenied?: boolean): Promise<any> => {
+    return api.patch(`/Feedback/UpdateStatus`, { id, status, resolution, isDenied });
   },
 
   getFlaggedList: async (): Promise<FeedbackDto[]> => {

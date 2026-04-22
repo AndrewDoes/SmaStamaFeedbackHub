@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [code, setCode] = useState("");
@@ -32,13 +33,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden font-sans bg-brand-background">
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden font-sans bg-brand-background">
+      {/* Logo */}
+      <Image src={'https://stamayk.sch.id/icons/logostamayk.svg'} alt="Logo" width={64} height={64} className="rounded-lg" />
       {/* Login Card */}
       <div className="relative z-10 w-full max-w-md px-6 py-12 mx-auto">
         <div className="bg-brand-surface/80 dark:bg-brand-surface/90 backdrop-blur-xl rounded-2xl shadow-premium border border-brand-primary/10 p-8 md:p-10">
           <div className="text-center mb-10">
             <h1 className="text-3xl md:text-4xl mb-2 text-brand-text-main">
-              Feedback Hub
+              Stama Listen
             </h1>
             <p className="text-brand-text-body/80 font-medium">
               SMA Santa Maria Yogyakarta

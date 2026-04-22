@@ -56,7 +56,7 @@ export default function StudentDirectoryPage() {
         <div className="flex-1 min-h-0 bg-brand-surface rounded-[32px] border border-brand-primary/5 shadow-premium flex flex-col overflow-hidden">
           {/* Scrollable Workspace */}
           <div className="flex-1 overflow-auto no-scrollbar relative">
-            <table className="w-full text-left border-separate border-spacing-0 min-w-[700px]">
+            <table className="w-full text-left border-separate border-spacing-0 min-w-[700px] hidden md:table">
               <thead className="sticky top-0 z-20">
                 <tr className="bg-brand-background/80 backdrop-blur-md">
                   <th className="pl-10 pr-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Contributor</th>
@@ -113,6 +113,50 @@ export default function StudentDirectoryPage() {
                 ))}
               </tbody>
             </table>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col divide-y divide-brand-primary/[0.03]">
+               {data?.items.map((student) => (
+                  <div 
+                    key={student.id} 
+                    onClick={() => router.push(`/admin/students/${student.id}`)}
+                    className="p-6 hover:bg-brand-primary/[0.01] active:bg-brand-primary/5 transition-colors"
+                  >
+                     <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-3">
+                           <div className="w-8 h-8 rounded-lg bg-brand-primary/5 flex items-center justify-center font-black text-brand-primary text-[10px]">
+                              {student.fullName.charAt(0)}
+                           </div>
+                           <div>
+                              <p className="font-bold text-brand-text-main text-xs">{student.fullName}</p>
+                              <p className="text-[8px] font-medium text-brand-text-body/30 tracking-tight">{student.code}</p>
+                           </div>
+                        </div>
+                        <div className={`w-1.5 h-1.5 rounded-full ${student.isActive ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-brand-error"}`} />
+                     </div>
+
+                     <div className="flex justify-between items-end">
+                        <div className="flex gap-4">
+                           <div className="flex flex-col">
+                              <span className="text-[7px] font-black uppercase text-brand-text-body/20 tracking-widest mb-1">Batch</span>
+                              <span className="text-[9px] font-bold text-brand-text-body/60 px-2 py-0.5 bg-brand-background border border-brand-primary/5 rounded">
+                                 {student.batchYear}
+                              </span>
+                           </div>
+                           <div className="flex flex-col">
+                              <span className="text-[7px] font-black uppercase text-brand-text-body/20 tracking-widest mb-1">Threads</span>
+                              <span className="text-[10px] font-black text-brand-primary">{student.feedbackCount}</span>
+                           </div>
+                        </div>
+                        <div className="text-brand-primary">
+                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                           </svg>
+                        </div>
+                     </div>
+                  </div>
+               ))}
+            </div>
 
             {(!data?.items || data.items.length === 0) && (
               <div className="h-64 flex flex-col items-center justify-center text-center">

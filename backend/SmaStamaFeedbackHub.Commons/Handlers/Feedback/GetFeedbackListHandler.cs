@@ -49,7 +49,7 @@ public class GetFeedbackListHandler : IRequestHandler<GetFeedbackListQuery, Page
         // 3. Status Filter
         if (request.IsHistory)
         {
-            query = query.Where(f => f.Status == FeedbackStatus.Resolved || f.Status == FeedbackStatus.Closed);
+            query = query.Where(f => f.Status == FeedbackStatus.Resolved);
         }
         else if (request.Status.HasValue)
         {
@@ -77,7 +77,10 @@ public class GetFeedbackListHandler : IRequestHandler<GetFeedbackListQuery, Page
                 CreatedAt = f.CreatedAt,
                 IsFlagged = f.IsFlagged,
                 Status = f.Status,
-                Category = f.Category
+                Category = f.Category,
+                Resolution = f.Resolution,
+                ResolvedAt = f.ResolvedAt,
+                IsDenied = f.IsDenied
             })
             .ToListAsync(cancellationToken);
 
