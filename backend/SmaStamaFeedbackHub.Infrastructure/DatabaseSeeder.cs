@@ -5,7 +5,7 @@ namespace SmaStamaFeedbackHub.Infrastructure;
 
 public static class DatabaseSeeder
 {
-    private const int CURRENT_SEED_VERSION = 9;
+    private const int CURRENT_SEED_VERSION = 10;
 
     public static async Task SeedAsync(AppDbContext context)
     {
@@ -22,6 +22,8 @@ public static class DatabaseSeeder
             
             // Wipe existing data (Order matters for constraints)
             Console.WriteLine("[Seeder] Wiping old data...");
+            await context.Attachments.ExecuteDeleteAsync();
+            await context.FeedbackLogs.ExecuteDeleteAsync();
             await context.Feedbacks.ExecuteDeleteAsync();
             await context.Users.ExecuteDeleteAsync();
             await context.ForbiddenWords.ExecuteDeleteAsync();

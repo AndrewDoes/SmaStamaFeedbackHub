@@ -26,7 +26,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<FeedbackLog>()
             .HasOne(l => l.Feedback)
-            .WithMany()
+            .WithMany(f => f.Logs)
             .HasForeignKey(l => l.FeedbackId);
 
         modelBuilder.Entity<FeedbackLog>()

@@ -100,13 +100,14 @@ public class FeedbackController : ControllerBase
         return Ok(new { Success = true });
     }
 
+    [Authorize(Roles = "Administrator")]
     [HttpPatch("UpdateStatus")]
     public async Task<IActionResult> UpdateStatus([FromBody] UpdateFeedbackStatusCommand command)
     {
         try
         {
             await _mediator.Send(command);
-            return NoContent();
+            return Ok(new { Success = true });
         }
         catch (UnauthorizedAccessException ex)
         {

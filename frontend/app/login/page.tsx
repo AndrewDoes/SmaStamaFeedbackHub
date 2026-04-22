@@ -17,8 +17,13 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await authService.login(code, password);
-      router.push("/");
+      const user = await authService.login(code, password);
+      const role = user.role || user.Role;
+      if (role === "Administrator") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || "Invalid credentials. Please try again.");
     } finally {

@@ -28,7 +28,8 @@ export default function AdminDashboardPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-queue", activeTab],
     queryFn: () => feedbackService.getFeedbacks({
-      status: activeTab === "Open" ? 0 : activeTab === "InProgress" ? 1 : 2,
+      status: activeTab === "Open" ? 0 : activeTab === "InProgress" ? 1 : undefined,
+      isHistory: activeTab === "History",
       pageSize: 1000
     }),
     enabled: mounted && role === "Administrator",
@@ -146,14 +147,16 @@ export default function AdminDashboardPage() {
                              <div className={`w-1.5 h-1.5 rounded-full ${
                                 item.status === 2 ? "bg-brand-success shadow-[0_0_8px_rgba(16,185,129,0.4)]" : 
                                 item.status === 1 ? "bg-brand-warning shadow-[0_0_8px_rgba(245,158,11,0.4)]" : 
+                                item.status === 3 ? "bg-brand-text-body/30 shadow-[0_0_8px_rgba(0,0,0,0.1)]" :
                                 "bg-brand-primary shadow-[0_0_8px_rgba(26,75,93,0.4)]"
                              }`} />
                              <span className={`text-[10px] font-black uppercase tracking-widest ${
                                 item.status === 2 ? "text-brand-success/80" : 
                                 item.status === 1 ? "text-brand-warning/80" : 
+                                item.status === 3 ? "text-brand-text-body/40" :
                                 "text-brand-primary/80"
                              }`}>
-                                {item.status === 2 ? "Resolved" : item.status === 1 ? "Progress" : "Queue"}
+                                {item.status === 2 ? "Resolved" : item.status === 1 ? "Progress" : item.status === 3 ? "Closed" : "Queue"}
                              </span>
                           </div>
                        </td>

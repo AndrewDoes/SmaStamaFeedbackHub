@@ -22,7 +22,7 @@ public class LoginHandler : IRequestHandler<LoginCommand, LoginResponse>
 
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Code == request.Code, cancellationToken);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Code.ToLower() == request.Code.ToLower(), cancellationToken);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {

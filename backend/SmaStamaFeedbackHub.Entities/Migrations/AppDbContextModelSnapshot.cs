@@ -231,7 +231,7 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
                         .IsRequired();
 
                     b.HasOne("SmaStamaFeedbackHub.Entities.Feedback", "Feedback")
-                        .WithMany()
+                        .WithMany("Logs")
                         .HasForeignKey("FeedbackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -244,6 +244,8 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
             modelBuilder.Entity("SmaStamaFeedbackHub.Entities.Feedback", b =>
                 {
                     b.Navigation("Attachments");
+
+                    b.Navigation("Logs");
 
                     b.Navigation("Replies");
                 });

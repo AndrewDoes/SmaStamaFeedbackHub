@@ -16,7 +16,7 @@ export default function FeedbackDetailPage() {
   const [auditData, setAuditData] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: feedback, isLoading, error } = useQuery({
+  const { data: feedback, isLoading, error, refetch } = useQuery({
     queryKey: ["feedback", id],
     queryFn: () => feedbackService.getFeedbackDetail(id as string),
   });
@@ -29,8 +29,8 @@ export default function FeedbackDetailPage() {
 
   const replyMutation = useMutation({
     mutationFn: (content: string) => feedbackService.submitReply(id as string, content),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["feedback", id] });
+    onSuccess: async () => {
+      await refetch();
       setReplyContent("");
       toast.success("Response posted");
     }
@@ -51,16 +51,20 @@ export default function FeedbackDetailPage() {
       }
       return Promise.reject("Cancelled");
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["feedback", id] });
+    onSuccess: async () => {
+      await refetch();
       toast.success("Thread status updated");
+    },
+    onError: (err: any) => {
+      toast.error("Failed to update status. Make sure you are logged in as an administrator.");
+      console.error("Status update error:", err);
     }
   });
 
   const flagMutation = useMutation({
     mutationFn: (reason: string) => feedbackService.flagFeedback(id as string, reason),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["feedback", id] });
+    onSuccess: async () => {
+      await refetch();
       toast.success("Thread reported to administration");
     }
   });
@@ -209,7 +213,7 @@ export default function FeedbackDetailPage() {
                     onClick={() => statusMutation.mutate(s)}
                     disabled={statusMutation.isPending || feedback.status === s}
                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${feedback.status === s
-                      ? "bg-brand-primary text-brand-background border-brand-primary"
+                      ? "bg-brand-primary text-brand-background border-brand-primary shadow-lg shadow-brand-primary/20"
                       : "bg-transparent text-brand-text-body/60 border-brand-primary/10 hover:border-brand-primary/30"
                       }`}
                   >
@@ -217,6 +221,9 @@ export default function FeedbackDetailPage() {
                   </button>
                 ))}
               </div>
+              <p className="mt-4 text-[10px] font-medium text-brand-text-body/40 italic">
+                Note: Every status transition is logged in the permanent audit trail at the bottom of this thread.
+              </p>
             </div>
           )}
         </section>
@@ -241,8 +248,8 @@ export default function FeedbackDetailPage() {
               const isStaff = reply.isStaffResponse;
 
               return (
-                <div key={reply.id} className={`flex flex-col ${isMe ? "items-end text-right" : "items-start text-left"}`}>
-                  <div className="relative max-w-[85%] md:max-w-[75%] group">
+                <div key={reply.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                  <div className="relative max-w-[85%] md:max-w-[75%] group text-left">
                     {!isMe && (
                       <div className="flex items-center gap-2 mb-1.5 px-2">
                         <span className="text-[10px] font-black uppercase tracking-widest text-brand-text-main/40">
@@ -313,6 +320,76 @@ export default function FeedbackDetailPage() {
             </form>
           </div>
         </section>
+
+        {/* Permanent Audit History (Below Chatbox) */}
+        {isStaff && (
+          <section className="bg-brand-surface p-8 rounded-3xl border border-brand-primary/5 shadow-sm">
+            <h3 className="text-brand-text-main font-black text-[10px] uppercase tracking-[0.2em] mb-8 flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-brand-primary shadow-[0_0_12px_rgba(26,75,93,0.4)]"></div>
+              Administrative Audit Trail
+            </h3>
+
+            <div className="flex flex-col">
+              {feedback.auditLogs && feedback.auditLogs.length > 0 ? (
+                feedback.auditLogs.map((log: any, idx: number) => (
+                  <div key={log.id} className="relative pl-12 pb-10 last:pb-0">
+                    {/* Timeline Line */}
+                    {idx !== (feedback.auditLogs?.length ?? 0) - 1 && (
+                      <div className="absolute left-[11px] top-[24px] bottom-0 w-0.5 bg-brand-primary/10"></div>
+                    )}
+
+                    {/* Timeline Dot */}
+                    <div className={`absolute left-0 top-1.5 w-6 h-6 rounded-xl flex items-center justify-center border-2 transition-all shadow-sm
+                      ${idx === 0
+                        ? "bg-brand-primary border-brand-primary text-brand-background shadow-lg shadow-brand-primary/20"
+                        : "bg-brand-surface border-brand-primary/20 text-brand-primary"
+                      }`}>
+                      {idx === 0 ? (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                      ) : (
+                        <div className="w-1.5 h-1.5 rounded-full bg-current"></div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${idx === 0 ? "text-brand-primary" : "text-brand-text-body/40"}`}>
+                          {log.action === "StatusUpdate" ? "Status Transition" : log.action}
+                        </span>
+                        <div className="h-px flex-1 bg-brand-primary/5"></div>
+                        <span className="text-[9px] font-bold text-brand-text-body/20 italic">
+                          {new Date(log.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-brand-background/50 px-3 py-1.5 rounded-xl border border-brand-primary/5">
+                          <span className="text-[10px] font-bold text-brand-text-body/30 line-through">{log.oldValue || "Initial"}</span>
+                          <svg className="w-3 h-3 text-brand-primary/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                          <span className="text-[10px] font-black text-brand-primary">{log.newValue}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-lg bg-brand-primary/5 flex items-center justify-center text-[9px] font-black text-brand-primary uppercase">
+                            {log.adminName.charAt(0)}
+                          </div>
+                          <p className="text-[9px] font-bold text-brand-text-body/40">Executed by <span className="text-brand-text-main">{log.adminName}</span></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-12 text-center">
+                  <div className="w-12 h-12 bg-brand-primary/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-6 h-6 text-brand-primary/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <p className="text-[10px] font-bold text-brand-text-body/20 uppercase tracking-widest italic">No transitions recorded yet</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

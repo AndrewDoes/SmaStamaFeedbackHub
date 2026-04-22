@@ -18,14 +18,23 @@ export default function LandingPage() {
     if (!authService.isAuthenticated()) {
       router.push("/login");
     } else {
-      setUserName(localStorage.getItem("user_name") || "Student");
-      setIsChecking(false);
+      const role = authService.getRole();
+      if (role === "Administrator") {
+        router.push("/admin");
+      } else {
+        setUserName(localStorage.getItem("user_name") || "Student");
+        setIsChecking(false);
+      }
     }
   }, [router]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["feedbacks"],
-    queryFn: () => feedbackService.getFeedbacks(),
+    queryKey: ["feedbacks", activeFilter],
+    queryFn: () => feedbackService.getFeedbacks({
+      status: (activeFilter === 0 || activeFilter === 1) ? activeFilter : undefined,
+      isHistory: activeFilter === 2 || activeFilter === 3 || activeFilter === null,
+      pageSize: 100
+    }),
     enabled: !isChecking,
   });
 
@@ -75,7 +84,7 @@ export default function LandingPage() {
               {isLoading && <span className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></span>}
             </h2>
             <div className="flex gap-1 bg-brand-background p-1 rounded-xl border border-brand-primary/5 w-full sm:w-auto overflow-x-auto no-scrollbar">
-              {[null, 0, 1, 2].map((f) => (
+              {[null, 0, 1, 2, 3].map((f) => (
                 <button
                   key={String(f)}
                   onClick={() => setActiveFilter(f)}
@@ -84,7 +93,7 @@ export default function LandingPage() {
                     : "text-brand-text-body/40 hover:text-brand-text-body/60"
                     }`}
                 >
-                  {f === null ? "All" : f === 0 ? "Open" : f === 1 ? "In Progress" : "Resolved"}
+                  {f === null ? "All" : f === 0 ? "Open" : f === 1 ? "In Progress" : f === 2 ? "Resolved" : "Closed"}
                 </button>
               ))}
             </div>

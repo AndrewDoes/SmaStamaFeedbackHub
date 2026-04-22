@@ -1,5 +1,14 @@
 import api from "./api";
 
+export interface AuditLogDto {
+  id: string;
+  adminName: string;
+  action: string;
+  oldValue: string;
+  newValue: string;
+  createdAt: string;
+}
+
 export interface FeedbackDto {
   id: string;
   title: string;
@@ -10,6 +19,7 @@ export interface FeedbackDto {
   category: number;
   replies: FeedbackDto[];
   attachmentUrls?: string[];
+  auditLogs?: AuditLogDto[];
   isStaffResponse: boolean;
   authorName: string;
   isAuthor: boolean;
@@ -23,11 +33,8 @@ export interface PagedResult<T> {
 }
 
 export const feedbackService = {
-  getFeedbacks: async (options: { pageNumber?: number; pageSize?: number; search?: string; status?: number } = {}): Promise<PagedResult<FeedbackDto>> => {
-    const { pageNumber = 1, pageSize = 10, search, status } = options;
-    const response = await api.get<PagedResult<FeedbackDto>>("/Feedback/GetFeedbackList", {
-      params: { pageNumber, pageSize, search, status }
-    });
+  getFeedbacks: async (params?: { category?: number; status?: number; search?: string; pageNumber?: number; pageSize?: number; isHistory?: boolean }): Promise<PagedResult<FeedbackDto>> => {
+    const response = await api.get<PagedResult<FeedbackDto>>("/Feedback/GetFeedbackList", { params });
     return response.data;
   },
 
@@ -43,7 +50,7 @@ export const feedbackService = {
     formData.append("title", title);
     formData.append("content", content);
     formData.append("category", category.toString());
-    
+
     if (proofs && proofs.length > 0) {
       proofs.forEach((file) => {
         formData.append("proofs", file);
@@ -72,7 +79,7 @@ export const feedbackService = {
   },
 
   updateFeedbackStatus: async (id: string, status: number): Promise<void> => {
-    await api.patch("/Feedback/UpdateStatus", { id, status });
+    await api.patch("/Feedback/UpdateStatus", { Id: id, Status: status });
   },
 
   getFlaggedList: async (): Promise<FeedbackDto[]> => {

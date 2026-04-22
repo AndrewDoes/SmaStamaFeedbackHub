@@ -65,7 +65,15 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DatabaseSeeder.SeedAsync(context);
+    try 
+    {
+        await DatabaseSeeder.SeedAsync(context);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[CRITICAL] Database Seeding Failed: {ex.Message}");
+        Console.WriteLine(ex.StackTrace);
+    }
 }
 
 // Configure the HTTP request pipeline.

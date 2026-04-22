@@ -30,7 +30,10 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
             .Include(f => f.Replies)
                 .ThenInclude(r => r.Owner)
             .Include(f => f.Attachments)
-            .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
+            .Include(f => f.Logs)
+                .ThenInclude(l => l.Admin)
+            .Where(f => f.Id == request.Id)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (feedback == null) throw new KeyNotFoundException("Feedback not found.");
 
@@ -47,6 +50,7 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
     {
         bool isStaff = item.Owner?.Role == UserRole.Administrator;
         bool isOwner = item.OwnerId == _userContext.UserId;
+        bool isAdmin = _userContext.Role == UserRole.Administrator;
         
         // True Anonymity Logic:
         // Mask the Student Name for everyone EXCEPT the staff.
@@ -65,7 +69,16 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
             IsAuthor = isOwner,
             AuthorName = maskedAuthorName,
             Replies = item.Replies.OrderBy(r => r.CreatedAt).Select(r => MapToDto(r)).ToList(),
-            AttachmentUrls = item.Attachments.Select(a => a.BlobUrl).ToList()
+            AttachmentUrls = item.Attachments.Select(a => a.BlobUrl).ToList(),
+            AuditLogs = isAdmin ? item.Logs.OrderByDescending(l => l.CreatedAt).Select(l => new FeedbackLogDto
+            {
+                Id = l.Id,
+                AdminName = l.Admin?.FullName ?? "System",
+                Action = l.Action,
+                OldValue = l.OldValue,
+                NewValue = l.NewValue,
+                CreatedAt = l.CreatedAt
+            }).ToList() : null
         };
     }
 }

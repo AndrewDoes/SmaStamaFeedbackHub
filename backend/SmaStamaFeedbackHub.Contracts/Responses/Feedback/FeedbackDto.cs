@@ -16,4 +16,5 @@ public class FeedbackDto
     public bool IsStaffResponse { get; set; }
     public string AuthorName { get; set; } = string.Empty;
     public bool IsAuthor { get; set; }
+    public List<FeedbackLogDto>? AuditLogs { get; set; }
 }

@@ -31,4 +31,5 @@ public class Feedback
     public FeedbackCategory Category { get; set; } = FeedbackCategory.Other;
 
     public List<FeedbackAttachment> Attachments { get; set; } = new();
+    public List<FeedbackLog> Logs { get; set; } = new();
 }
