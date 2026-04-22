@@ -8,7 +8,7 @@ using SmaStamaFeedbackHub.Commons.Services;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 
-public class SubmitFeedbackCommand : CreateFeedbackRequest, IRequest<Guid>, ISafeRequest
+public class SubmitFeedbackCommand : CreateFeedbackRequest, IRequest<Guid>
 {
     public List<IFormFile>? Proofs { get; set; }
 }

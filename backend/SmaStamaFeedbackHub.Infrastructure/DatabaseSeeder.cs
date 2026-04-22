@@ -26,7 +26,6 @@ public static class DatabaseSeeder
             await context.FeedbackLogs.ExecuteDeleteAsync();
             await context.Feedbacks.ExecuteDeleteAsync();
             await context.Users.ExecuteDeleteAsync();
-            await context.ForbiddenWords.ExecuteDeleteAsync();
 
             Console.WriteLine("[Seeder] Seeding users...");
             var admin = new User
@@ -100,28 +99,7 @@ public static class DatabaseSeeder
                 IsFlagged = false
             };
 
-            var flaggedFeedback = new Feedback
-            {
-                Id = Guid.NewGuid(),
-                Title = "System is BAD!!",
-                Content = "I hate everything about this school! badword badword!",
-                CreatedAt = DateTime.UtcNow,
-                OwnerId = student1.Id,
-                IsFlagged = true,
-                FlagReason = "Inappropriate language detected by automated safety filter."
-            };
-
-            context.Feedbacks.AddRange(feedback1, feedback2, flaggedFeedback);
-            
-            // Seed Forbidden Words
-            var forbiddenWords = new List<ForbiddenWord>
-            {
-                new() { Word = "badword" },
-                new() { Word = "toxic" },
-                new() { Word = "hate" },
-                new() { Word = "insult" }
-            };
-            context.ForbiddenWords.AddRange(forbiddenWords);
+            context.Feedbacks.AddRange(feedback1, feedback2);
 
             // Update Version
             // Update Version

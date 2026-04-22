@@ -5,7 +5,7 @@ using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 
-public class SubmitReplyCommand : ReplyToFeedbackRequest, IRequest<Guid>, ISafeRequest
+public class SubmitReplyCommand : ReplyToFeedbackRequest, IRequest<Guid>
 {
     public string Title => ""; // Replies don't have titles
 }
@@ -25,8 +25,6 @@ public class SubmitReplyHandler : IRequestHandler<SubmitReplyCommand, Guid>
     {
         // 1. Check if parent exists
         var parent = await _context.Feedbacks.FindAsync(request.ParentId);
-        if (parent == null) throw new KeyNotFoundException("The feedback you are replying to does not exist.");
-
         if (parent == null) throw new KeyNotFoundException("The feedback you are replying to does not exist.");
 
         // 3. Create reply (which is just a Feedback with a ParentId)

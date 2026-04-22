@@ -48,13 +48,11 @@ builder.Services.AddValidatorsFromAssembly(typeof(IJwtService).Assembly);
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(GetFeedbackListQuery).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(SafetyFilterBehavior<,>));
 });
 
 // DI
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
-builder.Services.AddScoped<ISafetyFilter, ForbiddenWordsService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IStorageService, AzureBlobStorageService>();
 builder.Services.AddHostedService<DeactivationBackgroundService>();
