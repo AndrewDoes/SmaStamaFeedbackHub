@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { authService } from "@/services/auth";
 import Image from "next/image";
+import NotificationBell from "./NotificationBell";
 
 export default function Topbar() {
   const [name, setName] = useState<string>("User");
@@ -24,6 +25,7 @@ export default function Topbar() {
       </div>
 
       <div className="flex items-center gap-6">
+        <NotificationBell />
         <div className="flex flex-col items-end">
           <span className="text-xs font-bold text-brand-text-main">{name}</span>
           <span className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/30">{role}</span>

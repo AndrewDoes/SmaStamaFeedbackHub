@@ -14,6 +14,8 @@ export default function AdminDashboardPage() {
   const [role, setRole] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<"Open" | "InProgress" | "History">("Open");
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     const currentRole = authService.getRole();
@@ -25,12 +27,18 @@ export default function AdminDashboardPage() {
     }
   }, [router]);
 
+  // Reset page when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-queue", activeTab],
+    queryKey: ["admin-queue", activeTab, currentPage],
     queryFn: () => feedbackService.getFeedbacks({
       status: activeTab === "Open" ? 0 : activeTab === "InProgress" ? 1 : undefined,
       isHistory: activeTab === "History",
-      pageSize: 1000
+      pageNumber: currentPage,
+      pageSize: pageSize
     }),
     enabled: mounted && role === "Administrator",
   });
@@ -45,6 +53,8 @@ export default function AdminDashboardPage() {
       default: return { name: "Other", color: "bg-gray-500/10 text-gray-500 border-gray-500/20" };
     }
   };
+
+  const totalPages = data ? Math.ceil(data.totalCount / pageSize) : 0;
 
   if (!mounted || isLoading) {
     return (
@@ -70,14 +80,14 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Tab System */}
-        <div className="bg-brand-surface border border-brand-primary/5 p-1 rounded-2xl flex justify-evenly gap-1 shadow-premium">
+        <div className="bg-brand-surface border border-brand-primary/5 p-1.5 rounded-2xl flex w-full lg:max-w-md shadow-premium">
           {(["Open", "InProgress", "History"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab
-                ? "bg-brand-primary text-brand-background shadow-lg"
-                : "text-brand-text-body/40 hover:text-brand-primary hover:bg-brand-primary/5"
+              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-center ${activeTab === tab
+                ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20 scale-100"
+                : "text-brand-text-body/40 hover:text-brand-text-body/60 hover:bg-brand-primary/5"
                 }`}
             >
               {tab === "InProgress" ? "In Progress" : tab}
@@ -115,9 +125,9 @@ export default function AdminDashboardPage() {
                   <tr
                     key={item.id}
                     onClick={() => router.push(`/feedback/${item.id}`)}
-                    className="hover:bg-brand-primary/[0.01] transition-colors group cursor-pointer"
+                    className={`hover:bg-brand-primary/5 transition-colors group cursor-pointer ${item.isFlagged ? "bg-red-500/[0.03] border-l-2 border-l-brand-error" : ""}`}
                   >
-                    <td className="pl-10 pr-6 py-4">
+                    <td className="pl-10 pr-6 py-5 border-b border-brand-primary/10">
                       <div className="flex items-center gap-4">
                         <div className="w-9 h-9 rounded-xl bg-brand-primary/5 flex items-center justify-center font-black text-brand-primary text-xs shadow-sm group-hover:bg-brand-primary group-hover:text-brand-background transition-all duration-300">
                           {item.authorName?.charAt(0) || "S"}
@@ -130,20 +140,20 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 border-b border-brand-primary/10">
                       <div className="flex items-center gap-3 mb-1">
                         <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-tighter border ${getCategoryTheme(item.category).color}`}>
                           {getCategoryTheme(item.category).name}
                         </span>
                         {item.isFlagged && (
-                          <span className="bg-brand-error text-brand-background text-[7px] font-black uppercase px-1.5 py-0.5 rounded animate-pulse">
+                          <span className="bg-brand-error text-brand-background text-[7px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm shadow-brand-error/20">
                             Flagged
                           </span>
                         )}
                       </div>
                       <p className="text-sm font-bold text-brand-text-main truncate max-w-[300px]">{item.title}</p>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-6 py-5 text-center border-b border-brand-primary/10">
                       <div className="inline-flex items-center gap-2">
                         <div className={`w-1.5 h-1.5 rounded-full ${item.status === 2 ? (item.isDenied ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]" : "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]") :
                           item.status === 1 ? "bg-brand-warning shadow-[0_0_8px_rgba(245,158,11,0.4)]" :
@@ -157,7 +167,7 @@ export default function AdminDashboardPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="pl-6 pr-10 py-4 text-right">
+                    <td className="pl-6 pr-10 py-5 text-right border-b border-brand-primary/10">
                       <button className="p-2.5 bg-brand-primary/5 text-brand-primary rounded-xl hover:bg-brand-primary hover:text-brand-background transition-all shadow-sm">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -181,7 +191,7 @@ export default function AdminDashboardPage() {
                 <div
                   key={item.id}
                   onClick={() => router.push(`/feedback/${item.id}`)}
-                  className="p-6 hover:bg-brand-primary/[0.01] active:bg-brand-primary/5 transition-colors"
+                  className={`p-6 hover:bg-brand-primary/[0.01] active:bg-brand-primary/5 transition-colors ${item.isFlagged ? "bg-red-500/[0.02] border-l-4 border-l-brand-error" : ""}`}
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
@@ -233,6 +243,31 @@ export default function AdminDashboardPage() {
             )}
           </div>
         </div>
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="p-6 bg-brand-background/30 border-t border-brand-primary/5 flex items-center justify-between shrink-0">
+            <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/30 italic">
+              Showing Page {currentPage} of {totalPages}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-brand-surface border border-brand-primary/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-brand-text-main disabled:opacity-30 hover:bg-brand-primary/5 transition-all"
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-brand-primary text-brand-background rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-30 hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

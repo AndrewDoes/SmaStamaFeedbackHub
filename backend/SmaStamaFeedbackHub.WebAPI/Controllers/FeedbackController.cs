@@ -37,6 +37,7 @@ public class FeedbackController : ControllerBase
         {
             Title = request.Title,
             Content = request.Content,
+            Category = request.Category,
             Proofs = proofs
         };
 

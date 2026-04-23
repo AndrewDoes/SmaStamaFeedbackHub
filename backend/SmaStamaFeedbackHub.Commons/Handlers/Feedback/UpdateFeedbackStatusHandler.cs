@@ -1,4 +1,5 @@
 using MediatR;
+using SmaStamaFeedbackHub.Commons.Services;
 using SmaStamaFeedbackHub.Contracts.Enums;
 using SmaStamaFeedbackHub.Entities;
 
@@ -16,11 +17,13 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
 {
     private readonly AppDbContext _context;
     private readonly IUserContext _userContext;
+    private readonly INotificationService _notificationService;
 
-    public UpdateFeedbackStatusHandler(AppDbContext context, IUserContext userContext)
+    public UpdateFeedbackStatusHandler(AppDbContext context, IUserContext userContext, INotificationService notificationService)
     {
         _context = context;
         _userContext = userContext;
+        _notificationService = notificationService;
     }
 
     public async Task Handle(UpdateFeedbackStatusCommand request, CancellationToken cancellationToken)
@@ -65,6 +68,25 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
             NewValue = request.Status.ToString(),
             CreatedAt = DateTime.UtcNow
         });
+        
+        // 5. Notify Student
+        if (oldStatus != request.Status)
+        {
+            string statusText = request.Status switch
+            {
+                FeedbackStatus.Open => "Active",
+                FeedbackStatus.InProgress => "In Progress",
+                FeedbackStatus.Resolved => request.IsDenied == true ? "Denied" : "Fulfilled",
+                _ => "Updated"
+            };
+
+            await _notificationService.SendNotificationAsync(
+                feedback.OwnerId,
+                $"Feedback {statusText}",
+                $"Your feedback thread '{feedback.Title}' has been moved to {statusText}.",
+                $"/feedback/{feedback.Id}"
+            );
+        }
         
         await _context.SaveChangesAsync(cancellationToken);
     }

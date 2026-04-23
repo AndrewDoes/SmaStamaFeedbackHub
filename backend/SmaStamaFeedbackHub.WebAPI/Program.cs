@@ -55,6 +55,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IStorageService, AzureBlobStorageService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHostedService<DeactivationBackgroundService>();
 
 var app = builder.Build();

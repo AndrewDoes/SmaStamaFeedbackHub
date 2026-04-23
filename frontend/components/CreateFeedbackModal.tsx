@@ -29,15 +29,39 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
     }
   });
 
+  const MAX_FILES = 5;
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
+      const totalCount = files.length + newFiles.length;
+
+      if (totalCount > MAX_FILES) {
+        setError(`Maximum ${MAX_FILES} files allowed.`);
+        return;
+      }
+
+      for (const file of newFiles) {
+        if (file.size > MAX_FILE_SIZE) {
+          setError(`File "${file.name}" exceeds the 10MB limit.`);
+          return;
+        }
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          setError(`File "${file.name}" has an unsupported format. Only JPG, PNG, and PDF allowed.`);
+          return;
+        }
+      }
+
+      setError("");
       setFiles((prev) => [...prev, ...newFiles]);
     }
   };
 
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
+    setError("");
   };
 
   const handleClose = () => {
@@ -72,7 +96,7 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
             className="space-y-6"
           >
             {error && (
-              <div className="p-4 bg-brand-error/10 border border-brand-error/20 text-brand-error text-sm rounded-xl">
+              <div className="p-4 bg-brand-error/10 border border-brand-error/20 text-brand-error text-sm rounded-xl animate-shake">
                 {error}
               </div>
             )}
@@ -143,30 +167,32 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
                     </button>
                   </div>
                 ))}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-20 rounded-xl border-2 border-dashed border-brand-primary/20 flex flex-col items-center justify-center text-brand-primary/40 hover:border-brand-primary/40 hover:text-brand-primary/60 transition-all bg-brand-primary/5 group"
-                >
-                  <svg className="w-8 h-8 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <span className="text-[10px] font-bold mt-1 uppercase">Add Proof</span>
-                </button>
+                {files.length < MAX_FILES && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-20 rounded-xl border-2 border-dashed border-brand-primary/20 flex flex-col items-center justify-center text-brand-primary/40 hover:border-brand-primary/40 hover:text-brand-primary/60 transition-all bg-brand-primary/5 group"
+                  >
+                    <svg className="w-8 h-8 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    <span className="text-[10px] font-bold mt-1 uppercase">Add Proof</span>
+                  </button>
+                )}
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
                   className="hidden"
                   multiple
-                  accept="image/png, image/jpeg, application/pdf"
+                  accept="image/png, image/jpeg, image/jpg, application/pdf"
                 />
               </div>
               <p className="mt-2 text-[10px] text-brand-text-body/40 italic flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Supported types: JPG, PNG, PDF. Max multiple files.
+                Max 5 files, 10MB each. Types: JPG, PNG, PDF.
               </p>
             </div>
 
