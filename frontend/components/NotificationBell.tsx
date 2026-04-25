@@ -21,7 +21,7 @@ export default function NotificationBell() {
   const { data: unreadCount } = useQuery({
     queryKey: ["unread-count"],
     queryFn: notificationService.getUnreadCount,
-    refetchInterval: 15000, // Check count every 15s
+    refetchInterval: 10000, // Check count every 10s for better real-time feel
   });
 
   const markReadMutation = useMutation({
@@ -92,13 +92,13 @@ export default function NotificationBell() {
       {isOpen && (
         <div className="absolute right-0 mt-3 w-80 bg-brand-surface rounded-2xl shadow-premium border border-brand-primary/10 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
           <div className="p-4 border-b border-brand-primary/5 flex justify-between items-center bg-brand-primary/5">
-            <h3 className="text-xs font-black uppercase tracking-widest text-brand-primary">Notifications</h3>
+            <h3 className="text-xs font-black uppercase tracking-widest text-brand-primary">Notifikasi</h3>
             {unreadCount !== undefined && unreadCount > 0 && (
               <button
                 onClick={() => markAllReadMutation.mutate()}
                 className="text-[9px] font-bold text-brand-text-body/40 hover:text-brand-primary uppercase tracking-tighter transition-colors"
               >
-                Mark all as read
+                Tandai semua telah dibaca
               </button>
             )}
           </div>
@@ -109,9 +109,8 @@ export default function NotificationBell() {
                 <div
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
-                  className={`p-4 border-b border-brand-primary/5 last:border-0 hover:bg-brand-primary/5 cursor-pointer transition-colors relative ${
-                    !n.isRead ? "bg-brand-primary/[0.02]" : ""
-                  }`}
+                  className={`p-4 border-b border-brand-primary/5 last:border-0 hover:bg-brand-primary/5 cursor-pointer transition-colors relative ${!n.isRead ? "bg-brand-primary/[0.02]" : ""
+                    }`}
                 >
                   {!n.isRead && (
                     <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-brand-primary rounded-full shadow-[0_0_8px_rgba(26,75,93,0.4)]" />
@@ -136,13 +135,13 @@ export default function NotificationBell() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/20">No new alerts</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/20">Tidak ada peringatan baru</p>
               </div>
             )}
           </div>
-          
+
           <div className="p-3 bg-brand-background text-center border-t border-brand-primary/5">
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-brand-text-body/20">Recent 50 alerts</span>
+            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-brand-text-body/40">Tab notifikasi hanya menampilkan 50 peringatan terbaru</span>
           </div>
         </div>
       )}

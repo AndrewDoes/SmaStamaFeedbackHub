@@ -44,16 +44,17 @@ export default function LandingPage() {
       pageSize: pageSize
     }),
     enabled: !isChecking,
+    refetchInterval: 30000, // Poll every 30s
   });
 
   const getCategoryDetails = (cat: number) => {
     switch (cat) {
-      case 0: return { label: "Facilities", color: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20" };
-      case 1: return { label: "Academic", color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20" };
-      case 2: return { label: "Student Affairs", color: "bg-amber-500/10 text-amber-600 border-amber-500/20" };
-      case 3: return { label: "Canteen", color: "bg-orange-500/10 text-orange-600 border-orange-500/20" };
-      case 4: return { label: "Reporting", color: "bg-brand-error/10 text-brand-error border-brand-error/20" };
-      default: return { label: "Other", color: "bg-brand-text-body/10 text-brand-text-body/60 border-brand-text-body/20" };
+      case 0: return { label: "Fasilitas", color: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20" };
+      case 1: return { label: "Akademik", color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20" };
+      case 2: return { label: "Kesiswaan", color: "bg-amber-500/10 text-amber-600 border-amber-500/20" };
+      case 3: return { label: "Kantin", color: "bg-orange-500/10 text-orange-600 border-orange-500/20" };
+      case 4: return { label: "Pelaporan", color: "bg-brand-error/10 text-brand-error border-brand-error/20" };
+      default: return { label: "Lainnya", color: "bg-brand-text-body/10 text-brand-text-body/60 border-brand-text-body/20" };
     }
   };
 
@@ -71,8 +72,8 @@ export default function LandingPage() {
     <div className=" py-4 md:py-8 px-4">
       <div className="mb-8 md:mb-12 header-section flex flex-col justify-center lg:flex-row lg:justify-between">
         <header className="flex flex-col justify-center mb-4 lg:mb-0">
-          <h1 className="text-3xl md:text-4xl font-black text-brand-text-main tracking-tight mb-2">School Feed</h1>
-          <p className="text-brand-text-body/60 text-base md:text-lg">Explore and contribute to the SMA Santa Maria Yogyakarta community.</p>
+          <h1 className="text-3xl md:text-4xl font-black text-brand-text-main tracking-tight mb-2">Beranda Sekolah</h1>
+          <p className="text-brand-text-body/60 text-base md:text-lg">Jelajahi dan berkontribusi pada komunitas SMA Santa Maria Yogyakarta.</p>
         </header>
         {authService.getRole() !== "Administrator" && (
           <button
@@ -80,7 +81,7 @@ export default function LandingPage() {
             className="fixed bottom-6 right-6 lg:static z-30 flex items-center justify-center lg:h-15 gap-2 px-5 py-5 md:px-6 md:py-4 lg:px-4 lg:py-2 bg-brand-primary text-brand-background rounded-full lg:rounded-xl shadow-[0_10px_40px_rgba(26,75,93,0.3)] lg:shadow-none hover:bg-brand-primary/90 hover:scale-105 active:scale-95 transition-all duration-300 group"
           >
             <span className="w-8 text-2xl lg:text-base font-bold">+</span>
-            <span className="inline font-bold">Create Feedback</span>
+            <span className="inline font-bold">Buat Umpan Balik</span>
           </button>
         )}
       </div>
@@ -91,7 +92,7 @@ export default function LandingPage() {
           <div className="p-5 md:p-8 flex-1">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <h2 className="text-xl md:text-2xl text-brand-text-main font-bold flex items-center gap-2">
-                Recent Activity
+                Aktivitas Terbaru
                 {isLoading && <span className="w-4 h-4 border-2 border-brand-primary border-t-transparent rounded-full animate-spin"></span>}
               </h2>
               <div className="flex gap-1 bg-brand-background p-1 rounded-xl border border-brand-primary/5 w-full sm:w-auto overflow-x-auto no-scrollbar">
@@ -104,7 +105,7 @@ export default function LandingPage() {
                       : "text-brand-text-body/40 hover:text-brand-text-body/60"
                       }`}
                   >
-                    {f === 0 ? "Active" : f === 1 ? "In Progress" : "Resolved"}
+                    {f === 0 ? "Aktif" : f === 1 ? "Sedang Diproses" : "Selesai"}
                   </button>
                 ))}
               </div>
@@ -121,7 +122,7 @@ export default function LandingPage() {
                   <div
                     key={fb.id}
                     onClick={() => router.push(`/feedback/${fb.id}`)}
-                    className="p-4 border-b border-brand-primary/20 last:border-0 hover:bg-brand-primary/5 rounded-xl transition-all border cursor-pointer group"
+                    className="p-6 bg-brand-surface border border-brand-primary/5 hover:border-brand-primary/20 hover:bg-brand-primary/[0.01] rounded-[24px] transition-all cursor-pointer group shadow-sm hover:shadow-premium"
                   >
                     <div className="flex justify-between items-start flex flex-col md:flex-row gap-4 mb-4">
                       <h3 className="font-bold text-brand-text-main group-hover:text-brand-primary transition-colors">{fb.title}</h3>
@@ -136,10 +137,10 @@ export default function LandingPage() {
                           fb.status === 1 ? "bg-brand-warning/10 text-brand-warning border-brand-warning/20" :
                             "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
                           }`}>
-                          {fb.status === 2 ? (fb.isDenied ? "Denied" : "Resolved") : fb.status === 1 ? "In Progress" : "Active"}
+                          {fb.status === 2 ? (fb.isDenied ? "Ditolak" : "Selesai") : fb.status === 1 ? "Sedang Diproses" : "Aktif"}
                         </span>
                         <span className="text-xs text-brand-text-body/50">
-                          {new Date(fb.createdAt).toLocaleDateString()}
+                          {new Date(fb.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}
                         </span>
                       </div>
                     </div>
@@ -149,7 +150,7 @@ export default function LandingPage() {
                     {fb.isFlagged && (
                       <div className="mt-2 text-[10px] uppercase tracking-wider font-bold text-brand-error flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-brand-error rounded-full"></span>
-                        Under Review
+                        Sedang Ditinjau
                       </div>
                     )}
                   </div>
@@ -162,8 +163,8 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-brand-text-main mb-2">No feedback yet</h3>
-                <p className="text-brand-text-body/60 max-w-xs">Your voice matters. Start a new thread to share your suggestions with the administration.</p>
+                <h3 className="text-xl font-bold text-brand-text-main mb-2">Belum ada umpan balik</h3>
+                <p className="text-brand-text-body/60 max-w-xs">Suara Anda penting. Mulai utas baru untuk berbagi saran Anda dengan administrasi.</p>
               </div>
             )}
           </div>
@@ -171,8 +172,8 @@ export default function LandingPage() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="p-6 bg-brand-background/30 border-t border-brand-primary/5 flex items-center justify-between shrink-0">
-              <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/30 italic">
-                Page {currentPage} of {totalPages}
+              <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/30">
+                Halaman {currentPage} dari {totalPages}
               </p>
               <div className="flex gap-2">
                 <button
@@ -180,14 +181,14 @@ export default function LandingPage() {
                   disabled={currentPage === 1}
                   className="px-4 py-2 bg-brand-surface border border-brand-primary/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-brand-text-main disabled:opacity-30 hover:bg-brand-primary/5 transition-all"
                 >
-                  Prev
+                  Seb
                 </button>
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 bg-brand-primary text-brand-background rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-30 hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
                 >
-                  Next
+                  Sel
                 </button>
               </div>
             </div>

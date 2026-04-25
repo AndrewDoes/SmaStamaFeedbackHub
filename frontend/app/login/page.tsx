@@ -26,7 +26,7 @@ export default function LoginPage() {
         router.push("/");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid credentials. Please try again.");
+      setError(err.response?.data?.message || "Kredensial tidak valid. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
@@ -51,21 +51,21 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-brand-text-main mb-2">
-                Student ID / Code
+                ID Siswa / Kode
               </label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-brand-surface/50 dark:bg-brand-background/20 border border-brand-primary/10 focus:border-brand-secondary focus:ring-2 focus:ring-brand-secondary/20 outline-none transition-all placeholder:text-brand-text-muted"
-                placeholder="Enter your ID"
+                placeholder="Masukkan ID Anda"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-brand-text-main mb-2">
-                Password
+                Kata Sandi
               </label>
               <input
                 type="password"
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 <div className="w-5 h-5 border-2 border-brand-background/30 border-t-brand-background rounded-full animate-spin"></div>
               ) : (
                 <>
-                  Sign In
+                  Masuk
                   <svg
                     className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                     fill="none"
@@ -113,7 +113,7 @@ export default function LoginPage() {
 
           <div className="mt-8 pt-8 border-t border-brand-primary/10 text-center">
             <p className="text-sm text-brand-text-body/60">
-              Technical issues? Contact the IT Department.
+              Masalah teknis? Hubungi Departemen IT.
             </p>
           </div>
         </div>

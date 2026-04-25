@@ -25,7 +25,7 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
       handleClose();
     },
     onError: (err: any) => {
-      setError(err.response?.data?.message || err.message || "Failed to submit feedback.");
+      setError(err.response?.data?.message || err.message || "Gagal mengirim umpan balik.");
     }
   });
 
@@ -39,17 +39,17 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
       const totalCount = files.length + newFiles.length;
 
       if (totalCount > MAX_FILES) {
-        setError(`Maximum ${MAX_FILES} files allowed.`);
+        setError(`Maksimal ${MAX_FILES} file diperbolehkan.`);
         return;
       }
 
       for (const file of newFiles) {
         if (file.size > MAX_FILE_SIZE) {
-          setError(`File "${file.name}" exceeds the 10MB limit.`);
+          setError(`File "${file.name}" melebihi batas 10MB.`);
           return;
         }
         if (!ALLOWED_TYPES.includes(file.type)) {
-          setError(`File "${file.name}" has an unsupported format. Only JPG, PNG, and PDF allowed.`);
+          setError(`File "${file.name}" memiliki format yang tidak didukung. Hanya JPG, PNG, dan PDF yang diperbolehkan.`);
           return;
         }
       }
@@ -80,7 +80,7 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
       <div className="w-full max-w-xl bg-brand-surface rounded-2xl shadow-premium border border-brand-primary/10 overflow-hidden animate-in fade-in zoom-in duration-300">
         <div className="p-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-brand-text-main">New Feedback Thread</h2>
+            <h2 className="text-2xl font-bold text-brand-text-main">Utas Umpan Balik Baru</h2>
             <button onClick={handleClose} className="text-brand-text-muted hover:text-brand-text-main transition-colors">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -102,47 +102,47 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-brand-text-main mb-2">Subject / Title</label>
+              <label className="block text-sm font-semibold text-brand-text-main mb-2">Subjek / Judul</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Brief summary of your feedback"
+                placeholder="Ringkasan singkat umpan balik Anda"
                 className="w-full px-4 py-3 rounded-xl bg-brand-background/30 border border-brand-primary/10 focus:border-brand-secondary outline-none transition-all"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-brand-text-main mb-2">Category</label>
+              <label className="block text-sm font-semibold text-brand-text-main mb-2">Kategori</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(parseInt(e.target.value))}
                 className="w-full px-4 py-3 rounded-xl bg-brand-background border border-brand-primary/10 focus:border-brand-secondary outline-none transition-all appearance-none cursor-pointer text-brand-text-main font-medium"
                 required
               >
-                <option value={0}>Facilities & Infrastructure</option>
-                <option value={1}>Academic & Curriculum</option>
-                <option value={2}>Student Affairs</option>
-                <option value={3}>Canteen & Services</option>
-                <option value={4}>Reporting & Safety</option>
-                <option value={5}>Other</option>
+                <option value={0}>Fasilitas & Infrastruktur</option>
+                <option value={1}>Akademik & Kurikulum</option>
+                <option value={2}>Kesiswaan</option>
+                <option value={3}>Kantin & Layanan</option>
+                <option value={4}>Pelaporan & Keamanan</option>
+                <option value={5}>Lainnya</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-brand-text-main mb-2">Details</label>
+              <label className="block text-sm font-semibold text-brand-text-main mb-2">Detail</label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Tell us more about your feedback..."
+                placeholder="Beri tahu kami lebih banyak tentang umpan balik Anda..."
                 className="w-full px-4 py-3 rounded-xl bg-brand-background/30 border border-brand-primary/10 focus:border-brand-secondary outline-none transition-all min-h-[120px] resize-none"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-brand-text-main mb-2">Proof / Attachments (Optional)</label>
+              <label className="block text-sm font-semibold text-brand-text-main mb-2">Bukti / Lampiran (Opsional)</label>
               <div className="flex flex-wrap gap-3">
                 {files.map((file, index) => (
                   <div key={index} className="relative group w-20 h-20 rounded-xl overflow-hidden border border-brand-primary/10 bg-brand-background/50">
@@ -176,7 +176,7 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
                     <svg className="w-8 h-8 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    <span className="text-[10px] font-bold mt-1 uppercase">Add Proof</span>
+                    <span className="text-[10px] font-bold mt-1 uppercase">Tambah Bukti</span>
                   </button>
                 )}
                 <input
@@ -188,11 +188,11 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
                   accept="image/png, image/jpeg, image/jpg, application/pdf"
                 />
               </div>
-              <p className="mt-2 text-[10px] text-brand-text-body/40 italic flex items-center gap-1">
+              <p className="mt-2 text-[10px] text-brand-text-body/40 flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Max 5 files, 10MB each. Types: JPG, PNG, PDF.
+                Maksimal 5 file, masing-masing 10MB. Tipe: JPG, PNG, PDF.
               </p>
             </div>
 
@@ -202,14 +202,14 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
                 onClick={handleClose}
                 className="flex-1 px-6 py-3 border border-brand-primary/10 text-brand-text-main font-semibold rounded-xl hover:bg-brand-primary/5 transition-all"
               >
-                Cancel
+                Batal
               </button>
               <button
                 type="submit"
                 disabled={mutation.isPending}
                 className="flex-1 px-6 py-3 bg-brand-primary text-brand-background font-bold rounded-xl hover:bg-brand-primary/90 transition-all disabled:opacity-50"
               >
-                {mutation.isPending ? "Submitting..." : "Submit Feedback"}
+                {mutation.isPending ? "Mengirim..." : "Kirim Umpan Balik"}
               </button>
             </div>
           </form>

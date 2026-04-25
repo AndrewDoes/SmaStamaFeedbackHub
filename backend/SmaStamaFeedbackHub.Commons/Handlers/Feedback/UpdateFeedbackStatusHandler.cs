@@ -31,13 +31,13 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
         // 1. Strict Authorization: Only Administrators can change status
         if (_userContext.Role != UserRole.Administrator)
         {
-            throw new UnauthorizedAccessException("Access Denied: Only administrators can update feedback status.");
+            throw new UnauthorizedAccessException("Akses Ditolak: Hanya administrator yang dapat memperbarui status umpan balik.");
         }
 
         var feedback = await _context.Feedbacks.FindAsync(new object[] { request.Id }, cancellationToken);
         if (feedback == null)
         {
-            throw new KeyNotFoundException("Feedback record not found.");
+            throw new KeyNotFoundException("Catatan umpan balik tidak ditemukan.");
         }
 
         // 2. Record transition for auditing
@@ -51,7 +51,7 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
         {
             if (string.IsNullOrWhiteSpace(request.Resolution))
             {
-                throw new ArgumentException("A resolution message is required when marking feedback as resolved.");
+                throw new ArgumentException("Pesan resolusi diperlukan saat menandai umpan balik sebagai selesai.");
             }
             feedback.Resolution = request.Resolution;
             feedback.ResolvedAt = DateTime.UtcNow;
@@ -74,16 +74,16 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
         {
             string statusText = request.Status switch
             {
-                FeedbackStatus.Open => "Active",
-                FeedbackStatus.InProgress => "In Progress",
-                FeedbackStatus.Resolved => request.IsDenied == true ? "Denied" : "Fulfilled",
-                _ => "Updated"
+                FeedbackStatus.Open => "Aktif",
+                FeedbackStatus.InProgress => "Sedang Diproses",
+                FeedbackStatus.Resolved => request.IsDenied == true ? "Ditolak" : "Dipenuhi",
+                _ => "Diperbarui"
             };
 
             await _notificationService.SendNotificationAsync(
                 feedback.OwnerId,
-                $"Feedback {statusText}",
-                $"Your feedback thread '{feedback.Title}' has been moved to {statusText}.",
+                $"Umpan Balik {statusText}",
+                $"Utas umpan balik Anda '{feedback.Title}' telah dipindahkan ke {statusText}.",
                 $"/feedback/{feedback.Id}"
             );
         }

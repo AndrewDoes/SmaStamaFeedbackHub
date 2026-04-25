@@ -72,7 +72,12 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
             IsAuthor = isOwner,
             AuthorName = maskedAuthorName,
             Replies = item.Replies.OrderBy(r => r.CreatedAt).Select(r => MapToDto(r)).ToList(),
-            AttachmentUrls = item.Attachments.Select(a => a.BlobUrl).ToList(),
+            Attachments = item.Attachments.Select(a => new AttachmentDto
+            {
+                Id = a.Id,
+                Url = a.BlobUrl,
+                FileName = a.FileName
+            }).ToList(),
             AuditLogs = isAdmin ? item.Logs.OrderByDescending(l => l.CreatedAt).Select(l => new FeedbackLogDto
             {
                 Id = l.Id,

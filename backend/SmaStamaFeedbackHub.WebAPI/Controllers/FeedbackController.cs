@@ -93,7 +93,24 @@ public class FeedbackController : ControllerBase
         return Ok(new { Success = true });
     }
 
-    [Authorize(Roles = "Administrator")]
+    [Authorize]
+    [HttpPut("UpdateFeedback")]
+    public async Task<IActionResult> Update([FromForm] UpdateFeedbackRequest request, [FromForm] List<IFormFile>? proofs)
+    {
+        var command = new UpdateFeedbackCommand
+        {
+            Id = request.Id,
+            Title = request.Title,
+            Content = request.Content,
+            Category = request.Category,
+            AttachmentIdsToDelete = request.AttachmentIdsToDelete,
+            Proofs = proofs
+        };
+        await _mediator.Send(command);
+        return Ok(new { Success = true });
+    }
+
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

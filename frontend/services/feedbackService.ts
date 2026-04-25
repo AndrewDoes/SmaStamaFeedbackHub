@@ -9,6 +9,12 @@ export interface AuditLogDto {
   createdAt: string;
 }
 
+export interface AttachmentDto {
+  id: string;
+  url: string;
+  fileName: string;
+}
+
 export interface FeedbackDto {
   id: string;
   title: string;
@@ -18,7 +24,7 @@ export interface FeedbackDto {
   status: number; // 0: Open, 1: InProgress, 2: Resolved, 3: Closed
   category: number;
   replies: FeedbackDto[];
-  attachmentUrls?: string[];
+  attachments: AttachmentDto[];
   auditLogs?: AuditLogDto[];
   isStaffResponse: boolean;
   authorName: string;
@@ -96,5 +102,15 @@ export const feedbackService = {
 
   resolveFeedbackFlag: async (feedbackId: string): Promise<void> => {
     await api.post("/Feedback/ResolveFlag", { feedbackId });
+  },
+
+  deleteFeedback: async (id: string): Promise<void> => {
+    await api.delete(`/Feedback/${id}`);
+  },
+
+  updateFeedback: async (formData: FormData): Promise<void> => {
+    await api.put("/Feedback/UpdateFeedback", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
   }
 };

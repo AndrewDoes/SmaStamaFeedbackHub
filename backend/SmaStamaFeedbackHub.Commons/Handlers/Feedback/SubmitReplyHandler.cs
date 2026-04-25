@@ -28,7 +28,13 @@ public class SubmitReplyHandler : IRequestHandler<SubmitReplyCommand, Guid>
     {
         // 1. Check if parent exists
         var parent = await _context.Feedbacks.FindAsync(request.ParentId);
-        if (parent == null) throw new KeyNotFoundException("The feedback you are replying to does not exist.");
+        if (parent == null) throw new KeyNotFoundException("Umpan balik yang Anda balas tidak ada.");
+
+        // 2. Workflow Check: No replies until InProgress
+        if (parent.Status == FeedbackStatus.Open)
+        {
+            throw new InvalidOperationException("Utas ini masih dalam antrean. Balasan hanya diaktifkan setelah dipindahkan ke 'Sedang Diproses' oleh administrator.");
+        }
 
         // 3. Create reply (which is just a Feedback with a ParentId)
         var reply = new Entities.Feedback
@@ -51,8 +57,8 @@ public class SubmitReplyHandler : IRequestHandler<SubmitReplyCommand, Guid>
             // Admin replied -> Notify Student (parent.OwnerId)
             await _notificationService.SendNotificationAsync(
                 parent.OwnerId,
-                "New Administrative Reply",
-                $"An administrator has replied to your thread '{parent.Title}'.",
+                "Balasan Administratif Baru",
+                $"Administrator telah membalas utas Anda '{parent.Title}'.",
                 $"/feedback/{parent.Id}"
             );
         }
@@ -61,8 +67,8 @@ public class SubmitReplyHandler : IRequestHandler<SubmitReplyCommand, Guid>
             // Someone else (maybe admin via different path or user-to-user if allowed) replied
             await _notificationService.SendNotificationAsync(
                 parent.OwnerId,
-                "New Reply",
-                $"Someone has replied to your thread '{parent.Title}'.",
+                "Balasan Baru",
+                $"Seseorang telah membalas utas Anda '{parent.Title}'.",
                 $"/feedback/{parent.Id}"
             );
         }

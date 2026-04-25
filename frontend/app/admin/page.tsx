@@ -41,16 +41,17 @@ export default function AdminDashboardPage() {
       pageSize: pageSize
     }),
     enabled: mounted && role === "Administrator",
+    refetchInterval: 15000, // Admins get faster updates (15s)
   });
 
   const getCategoryTheme = (cat: number) => {
     switch (cat) {
-      case 0: return { name: "Facilities", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" };
-      case 1: return { name: "Academic", color: "bg-purple-500/10 text-purple-500 border-purple-500/20" };
-      case 2: return { name: "Student Affairs", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
-      case 3: return { name: "Canteen", color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" };
-      case 4: return { name: "Safety/Reporting", color: "bg-red-500/10 text-red-500 border-red-500/20" };
-      default: return { name: "Other", color: "bg-gray-500/10 text-gray-500 border-gray-500/20" };
+      case 0: return { name: "Fasilitas", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" };
+      case 1: return { name: "Akademik", color: "bg-purple-500/10 text-purple-500 border-purple-500/20" };
+      case 2: return { name: "Kesiswaan", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
+      case 3: return { name: "Kantin", color: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" };
+      case 4: return { name: "Keamanan/Pelaporan", color: "bg-red-500/10 text-red-500 border-red-500/20" };
+      default: return { name: "Lainnya", color: "bg-gray-500/10 text-gray-500 border-gray-500/20" };
     }
   };
 
@@ -68,29 +69,31 @@ export default function AdminDashboardPage() {
     <div className="w-full px-4 md:px-10 py-8 flex flex-col h-[calc(100vh-64px)]">
       <header className="relative border-b border-brand-primary/10 pb-6 flex flex-col lg:flex-row lg:items-end justify-between gap-6 shrink-0">
         <div>
-          <h1 className="text-3xl font-black text-brand-text-main tracking-tighter mb-2 italic">
-            Dashboard<span className="text-brand-primary"> </span>Admin
+          <h1 className="text-3xl font-black text-brand-text-main tracking-tighter mb-2">
+            Dasbor<span className="text-brand-primary"> </span>Admin
           </h1>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/40 italic">Live Feed Active • {data?.totalCount || 0} Threads</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/40">Feed Langsung Aktif • {data?.totalCount || 0} Utas</span>
             </div>
           </div>
         </div>
 
         {/* Tab System */}
         <div className="bg-brand-surface border border-brand-primary/5 p-1.5 rounded-2xl flex w-full lg:max-w-md shadow-premium">
-          {(["Open", "InProgress", "History"] as const).map((tab) => (
+          {(["Terbuka", "Sedang Diproses", "Riwayat"] as const).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-center ${activeTab === tab
-                ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20 scale-100"
-                : "text-brand-text-body/40 hover:text-brand-text-body/60 hover:bg-brand-primary/5"
+              onClick={() => setActiveTab(tab === "Terbuka" ? "Open" : tab === "Sedang Diproses" ? "InProgress" : "History")}
+              className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-center ${(activeTab === "Open" && tab === "Terbuka") ||
+                  (activeTab === "InProgress" && tab === "Sedang Diproses") ||
+                  (activeTab === "History" && tab === "Riwayat")
+                  ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20 scale-100"
+                  : "text-brand-text-body/40 hover:text-brand-text-body/60 hover:bg-brand-primary/5"
                 }`}
             >
-              {tab === "InProgress" ? "In Progress" : tab}
+              {tab}
             </button>
           ))}
         </div>
@@ -102,10 +105,10 @@ export default function AdminDashboardPage() {
           <table className="w-full text-left border-separate border-spacing-0 min-w-[900px] hidden md:table">
             <thead className="sticky top-0 z-20">
               <tr className="bg-brand-background/80 backdrop-blur-md">
-                <th className="pl-10 pr-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Contributor</th>
-                <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Thread Content</th>
+                <th className="pl-10 pr-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Kontributor</th>
+                <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Isi Utas</th>
                 <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5 text-center">Status</th>
-                <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5 text-right">Actions</th>
+                <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-primary/[0.03]">
@@ -117,7 +120,7 @@ export default function AdminDashboardPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707.293l-2.414-2.414A1 1 0 006.586 13H4" />
                       </svg>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/20">No items in {activeTab} queue</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/20">Tidak ada item dalam antrean {activeTab === "Open" ? "Terbuka" : activeTab === "InProgress" ? "Sedang Diproses" : "Riwayat"}</p>
                   </td>
                 </tr>
               ) : (
@@ -133,7 +136,7 @@ export default function AdminDashboardPage() {
                           {item.authorName?.charAt(0) || "S"}
                         </div>
                         <div>
-                          <p className="font-bold text-brand-text-main text-sm leading-tight">{item.authorName || "Anonymous"}</p>
+                          <p className="font-bold text-brand-text-main text-sm leading-tight">{item.authorName || "Anonim"}</p>
                           <p className="text-[9px] font-medium text-brand-text-body/30 tracking-tight">
                             {new Date(item.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })} • {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
@@ -147,7 +150,7 @@ export default function AdminDashboardPage() {
                         </span>
                         {item.isFlagged && (
                           <span className="bg-brand-error text-brand-background text-[7px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm shadow-brand-error/20">
-                            Flagged
+                            Ditandai
                           </span>
                         )}
                       </div>
@@ -163,7 +166,7 @@ export default function AdminDashboardPage() {
                           item.status === 1 ? "text-brand-warning/80" :
                             "text-brand-primary/80"
                           }`}>
-                          {item.status === 2 ? (item.isDenied ? "Denied" : "Fulfilled") : item.status === 1 ? "In Progress" : "Queue"}
+                          {item.status === 2 ? (item.isDenied ? "Ditolak" : "Dipenuhi") : item.status === 1 ? "Sedang Diproses" : "Antrean"}
                         </span>
                       </div>
                     </td>
@@ -184,7 +187,7 @@ export default function AdminDashboardPage() {
           <div className="md:hidden flex flex-col divide-y divide-brand-primary/[0.03]">
             {data?.items?.length === 0 ? (
               <div className="py-24 text-center">
-                <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/20">No items in {activeTab} queue</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/20">Tidak ada item dalam antrean {activeTab === "Open" ? "Terbuka" : activeTab === "InProgress" ? "Sedang Diproses" : "Riwayat"}</p>
               </div>
             ) : (
               data?.items?.map((item: FeedbackDto) => (
@@ -199,9 +202,9 @@ export default function AdminDashboardPage() {
                         {item.authorName?.charAt(0) || "S"}
                       </div>
                       <div>
-                        <p className="font-bold text-brand-text-main text-xs">{item.authorName || "Anonymous"}</p>
+                        <p className="font-bold text-brand-text-main text-xs">{item.authorName || "Anonim"}</p>
                         <p className="text-[8px] font-medium text-brand-text-body/30 uppercase tracking-widest">
-                          {new Date(item.createdAt).toLocaleDateString()}
+                          {new Date(item.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}
                         </p>
                       </div>
                     </div>
@@ -218,7 +221,7 @@ export default function AdminDashboardPage() {
                       </span>
                       {item.isFlagged && (
                         <span className="bg-brand-error text-brand-background text-[6px] font-black uppercase px-1 py-0.5 rounded">
-                          Flagged
+                          Ditandai
                         </span>
                       )}
                     </div>
@@ -230,7 +233,7 @@ export default function AdminDashboardPage() {
                       item.status === 1 ? "text-brand-warning" :
                         "text-brand-primary"
                       }`}>
-                      {item.status === 2 ? (item.isDenied ? "Denied" : "Fulfilled") : item.status === 1 ? "In Progress" : "Queue"}
+                      {item.status === 2 ? (item.isDenied ? "Ditolak" : "Dipenuhi") : item.status === 1 ? "Sedang Diproses" : "Antrean"}
                     </span>
                     <div className="text-brand-primary">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,8 +250,8 @@ export default function AdminDashboardPage() {
         {/* Pagination Bar */}
         {totalPages > 1 && (
           <div className="p-6 bg-brand-background/30 border-t border-brand-primary/5 flex items-center justify-between shrink-0">
-            <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/30 italic">
-              Showing Page {currentPage} of {totalPages}
+            <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/30">
+              Menampilkan Halaman {currentPage} dari {totalPages}
             </p>
             <div className="flex gap-2">
               <button
@@ -256,14 +259,14 @@ export default function AdminDashboardPage() {
                 disabled={currentPage === 1}
                 className="px-4 py-2 bg-brand-surface border border-brand-primary/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-brand-text-main disabled:opacity-30 hover:bg-brand-primary/5 transition-all"
               >
-                Prev
+                Seb
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 bg-brand-primary text-brand-background rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-30 hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
               >
-                Next
+                Sel
               </button>
             </div>
           </div>

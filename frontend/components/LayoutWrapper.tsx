@@ -4,16 +4,20 @@ import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import Image from "next/image";
+import Link from "next/link";
+import { authService } from "@/services/auth";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   const isLoginPage = pathname === "/login";
   const isForceChangePage = pathname === "/auth/force-change-password";
 
   // Close sidebar when navigating & Enforce password change
   useEffect(() => {
     setIsSidebarOpen(false);
+    setRole(authService.getRole());
 
     // Enforce Password Change
     const mustChange = localStorage.getItem("must_change_password") === "true";
@@ -28,10 +32,10 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         <>
           {/* Mobile Header */}
           <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-brand-surface/80 backdrop-blur-md border-b border-brand-primary/5 z-40 px-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <Link href={role === "Administrator" ? "/admin" : "/"} className="flex items-center gap-2">
               <Image src={'https://stamayk.sch.id/icons/logostamayk.svg'} alt="Logo" width={32} height={32} className="rounded-lg" />
               <span className="font-black text-brand-text-main tracking-tighter">SMA Santa Maria Yogyakarta</span>
-            </div>
+            </Link>
             <button
               onClick={() => setIsSidebarOpen(true)}
               className="p-2 text-brand-primary hover:bg-brand-primary/5 rounded-xl transition-all"

@@ -28,7 +28,7 @@ public class Feedback
     public string? FlagReason { get; set; }
 
     public FeedbackStatus Status { get; set; } = FeedbackStatus.Open;
-    public FeedbackCategory Category { get; set; } = FeedbackCategory.Other;
+    public FeedbackCategory Category { get; set; } = FeedbackCategory.Lainnya;
     
     public string? Resolution { get; set; }
     public DateTime? ResolvedAt { get; set; }

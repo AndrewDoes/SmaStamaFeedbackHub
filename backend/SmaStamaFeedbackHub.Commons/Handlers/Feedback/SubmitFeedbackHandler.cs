@@ -41,22 +41,22 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
 
         if (todayCount >= DAILY_LIMIT)
         {
-            throw new InvalidOperationException($"Daily feedback limit reached ({DAILY_LIMIT}). Please try again tomorrow.");
+            throw new InvalidOperationException($"Batas harian umpan balik telah tercapai ({DAILY_LIMIT}). Silakan coba lagi besok.");
         }
 
         // 2. Validate Proofs
         if (request.Proofs != null)
         {
             if (request.Proofs.Count > MAX_FILES)
-                throw new InvalidOperationException($"Maximum {MAX_FILES} attachments allowed.");
+                throw new InvalidOperationException($"Maksimal {MAX_FILES} lampiran diperbolehkan.");
 
             foreach (var file in request.Proofs)
             {
                 if (file.Length > MAX_FILE_SIZE)
-                    throw new InvalidOperationException($"File '{file.FileName}' exceeds the 10MB size limit.");
+                    throw new InvalidOperationException($"File '{file.FileName}' melebihi batas ukuran 10MB.");
 
                 if (!ALLOWED_TYPES.Contains(file.ContentType.ToLower()))
-                    throw new InvalidOperationException($"File '{file.FileName}' has an unsupported format. Only JPG, PNG, and PDF are allowed.");
+                    throw new InvalidOperationException($"File '{file.FileName}' memiliki format yang tidak didukung. Hanya JPG, PNG, dan PDF yang diperbolehkan.");
             }
         }
 
