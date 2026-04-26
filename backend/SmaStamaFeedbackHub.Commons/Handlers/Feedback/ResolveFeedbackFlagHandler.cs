@@ -1,4 +1,5 @@
 using MediatR;
+using SmaStamaFeedbackHub.Commons.Services;
 using SmaStamaFeedbackHub.Contracts.Requests.Feedback;
 using SmaStamaFeedbackHub.Entities;
 
@@ -9,10 +10,11 @@ public class ResolveFeedbackFlagCommand : ResolveFeedbackFlagRequest, IRequest<b
 public class ResolveFeedbackFlagHandler : IRequestHandler<ResolveFeedbackFlagCommand, bool>
 {
     private readonly AppDbContext _context;
-
-    public ResolveFeedbackFlagHandler(AppDbContext context)
+    private readonly INotificationService _notificationService;
+    public ResolveFeedbackFlagHandler(AppDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<bool> Handle(ResolveFeedbackFlagCommand request, CancellationToken cancellationToken)
@@ -24,6 +26,14 @@ public class ResolveFeedbackFlagHandler : IRequestHandler<ResolveFeedbackFlagCom
         feedback.FlagReason = null;
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        await _notificationService.SendNotificationAsync(
+            feedback.OwnerId,
+            "Feedback Tidak Ditandai Lagi",
+            $"Feedback \'{feedback.Title}\' sudah tidak ditandai (flagged) lagi oleh admin",
+            $"/feedback/{feedback.Id}"
+        );
+
         return true;
     }
 }

@@ -5,6 +5,7 @@ import { feedbackService, FeedbackDto } from "@/services/feedbackService";
 import { authService } from "@/services/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function AdminDashboardPage() {
@@ -87,10 +88,10 @@ export default function AdminDashboardPage() {
               key={tab}
               onClick={() => setActiveTab(tab === "Terbuka" ? "Open" : tab === "Sedang Diproses" ? "InProgress" : "History")}
               className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-center ${(activeTab === "Open" && tab === "Terbuka") ||
-                  (activeTab === "InProgress" && tab === "Sedang Diproses") ||
-                  (activeTab === "History" && tab === "Riwayat")
-                  ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20 scale-100"
-                  : "text-brand-text-body/40 hover:text-brand-text-body/60 hover:bg-brand-primary/5"
+                (activeTab === "InProgress" && tab === "Sedang Diproses") ||
+                (activeTab === "History" && tab === "Riwayat")
+                ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20 scale-100"
+                : "text-brand-text-body/40 hover:text-brand-text-body/60 hover:bg-brand-primary/5"
                 }`}
             >
               {tab}
@@ -259,14 +260,14 @@ export default function AdminDashboardPage() {
                 disabled={currentPage === 1}
                 className="px-4 py-2 bg-brand-surface border border-brand-primary/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-brand-text-main disabled:opacity-30 hover:bg-brand-primary/5 transition-all"
               >
-                Seb
+                <ChevronLeft />
               </button>
               <button
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 bg-brand-primary text-brand-background rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-30 hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
               >
-                Sel
+                <ChevronRight />
               </button>
             </div>
           </div>

@@ -31,8 +31,8 @@ public class FlagFeedbackHandler : IRequestHandler<FlagFeedbackCommand, bool>
         // Notify the owner
         await _notificationService.SendNotificationAsync(
             feedback.OwnerId,
-            "Feedback Under Review ⚠️",
-            "One of your feedback threads has been flagged for review by the community/admin.",
+            "Feedback Ditandai Untuk Pengecekan ⚠️",
+            $"Feedback \'{feedback.Title}\' ditandai untuk pengecekan (flagged)",
             $"/feedback/{feedback.Id}"
         );
 
