@@ -13,6 +13,7 @@ export default function MyFeedbackPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["my-feedbacks"],
     queryFn: () => feedbackService.getFeedbacks(), // Backend already filters this to OWN feedback for students
+    refetchInterval: 30000, // Poll every 30s
   });
 
   const filteredItems = data?.items.filter((item: FeedbackDto) => {
@@ -34,28 +35,28 @@ export default function MyFeedbackPage() {
   return (
     <div className="py-8 px-4">
       <header className="mb-12">
-        <h1 className="text-4xl font-black text-brand-text-main tracking-tight mb-2">My Voice Portal</h1>
-        <p className="text-brand-text-body/60">Manage and track the progress of your personal suggestions.</p>
+        <h1 className="text-4xl font-black text-brand-text-main tracking-tight mb-2">Portal Suara Saya</h1>
+        <p className="text-brand-text-body/60">Kelola dan lacak kemajuan saran pribadi Anda.</p>
       </header>
 
-      <div className="flex gap-2 md:gap-4 mb-8 p-1 bg-brand-surface rounded-2xl border border-brand-primary/5 w-full sm:w-fit overflow-x-auto no-scrollbar">
+      <div className="flex gap-2 mb-8 p-1.5 bg-brand-surface rounded-2xl border-2 border-brand-primary/10 w-full sm:w-fit">
         <button
           onClick={() => setActiveTab("active")}
-          className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === "active"
+          className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "active"
             ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20"
-            : "text-brand-text-body/60 hover:text-brand-primary"
+            : "text-brand-text-body/40 hover:text-brand-primary hover:bg-brand-primary/5"
             }`}
         >
-          Active Discussions
+          Aktif
         </button>
         <button
           onClick={() => setActiveTab("history")}
-          className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === "history"
+          className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "history"
             ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20"
-            : "text-brand-text-body/60 hover:text-brand-primary"
+            : "text-brand-text-body/40 hover:text-brand-primary hover:bg-brand-primary/5"
             }`}
         >
-          Resolution History
+          Riwayat
         </button>
       </div>
 
@@ -64,19 +65,19 @@ export default function MyFeedbackPage() {
           <div
             key={item.id}
             onClick={() => router.push(`/feedback/${item.id}`)}
-            className="group bg-brand-surface p-6 rounded-3xl border border-brand-primary/5 hover:border-brand-primary/20 transition-all cursor-pointer shadow-premium hover:shadow-xl hover:-translate-y-1"
+            className="group bg-brand-surface p-6 rounded-3xl border-2 border-brand-primary/10 hover:border-brand-primary/30 transition-all cursor-pointer shadow-premium hover:shadow-xl hover:-translate-y-1"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-brand-text-main group-hover:text-brand-primary transition-colors mb-1">{item.title}</h3>
-                <p className="text-xs text-brand-text-body/40 font-medium italic">Submitted on {new Date(item.createdAt).toLocaleDateString()}</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-brand-text-main group-hover:text-brand-primary transition-colors mb-1 leading-tight">{item.title}</h3>
+                <p className="text-[10px] text-brand-text-body/30 font-black uppercase tracking-widest">Dikirim {new Date(item.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}</p>
               </div>
-              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${item.status === 2 ? "bg-brand-success/10 text-brand-success border-brand-success/20" :
-                  item.status === 1 ? "bg-brand-warning/10 text-brand-warning border-brand-warning/20" :
-                    item.status === 3 ? "bg-brand-text-body/10 text-brand-text-body/40 border-brand-text-body/10" :
-                      "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
+              <span className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0 ${item.status === 2 ? item.isDenied ? "bg-brand-error/10 text-brand-error border-brand-error/20" : "bg-brand-success/10 text-brand-success border-brand-success/20" :
+                item.status === 1 ? "bg-brand-warning/10 text-brand-warning border-brand-warning/20" :
+                  item.status === 3 ? "bg-brand-text-body/10 text-brand-text-body/40 border-brand-text-body/10" :
+                    "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
                 }`}>
-                {item.status === 2 ? "Resolved" : item.status === 1 ? "In Progress" : item.status === 3 ? "Closed" : "Open"}
+                {item.status === 2 ? (item.isDenied ? "Ditolak" : "Selesai") : item.status === 1 ? "Sedang Diproses" : item.status === 3 ? "Ditutup" : "Aktif"}
               </span>
             </div>
             <p className="text-brand-text-body/70 text-sm leading-relaxed line-clamp-2">
@@ -87,11 +88,11 @@ export default function MyFeedbackPage() {
 
         {filteredItems.length === 0 && (
           <div className="py-24 text-center bg-brand-surface rounded-3xl border-2 border-dashed border-brand-primary/10">
-            <h3 className="text-xl font-bold text-brand-text-main/50">No {activeTab} records found</h3>
+            <h3 className="text-xl font-bold text-brand-text-main/50">Tidak ada catatan {activeTab === "active" ? "aktif" : "riwayat"} ditemukan</h3>
             <p className="text-sm text-brand-text-body/30 mt-1">
               {activeTab === "active"
-                ? "All your suggestions are either resolved or you haven't started one yet!"
-                : "Your resolution history is currently empty."}
+                ? "Semua saran Anda sudah selesai atau Anda belum memulai satu pun!"
+                : "Riwayat resolusi Anda saat ini kosong."}
             </p>
           </div>
         )}

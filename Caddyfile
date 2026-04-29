@@ -1,0 +1,13 @@
+{
+    # This disables the admin API to keep it simple
+    admin off
+}
+
+# Listen on port 443 (HTTPS)
+:443 {
+    # Use your existing certificates
+    tls /etc/caddy/certificates/localhost.pem /etc/caddy/certificates/localhost-key.pem
+    
+    # Send traffic to the frontend container
+    reverse_proxy frontend:3000
+}

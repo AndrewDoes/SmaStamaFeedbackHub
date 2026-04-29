@@ -41,6 +41,9 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
                     b.Property<string>("FlagReason")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDenied")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsFlagged")
                         .HasColumnType("boolean");
 
@@ -49,6 +52,12 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
 
                     b.Property<Guid?>("ParentId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Resolution")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -129,14 +138,37 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
                     b.ToTable("FeedbackLogs");
                 });
 
-            modelBuilder.Entity("SmaStamaFeedbackHub.Entities.ForbiddenWord", b =>
+            modelBuilder.Entity("SmaStamaFeedbackHub.Entities.Notification", b =>
                 {
-                    b.Property<string>("Word")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Link")
                         .HasColumnType("text");
 
-                    b.HasKey("Word");
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.ToTable("ForbiddenWords");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("SmaStamaFeedbackHub.Entities.SystemMetadata", b =>
@@ -231,7 +263,7 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
                         .IsRequired();
 
                     b.HasOne("SmaStamaFeedbackHub.Entities.Feedback", "Feedback")
-                        .WithMany()
+                        .WithMany("Logs")
                         .HasForeignKey("FeedbackId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -241,9 +273,22 @@ namespace SmaStamaFeedbackHub.Entities.Migrations
                     b.Navigation("Feedback");
                 });
 
+            modelBuilder.Entity("SmaStamaFeedbackHub.Entities.Notification", b =>
+                {
+                    b.HasOne("SmaStamaFeedbackHub.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SmaStamaFeedbackHub.Entities.Feedback", b =>
                 {
                     b.Navigation("Attachments");
+
+                    b.Navigation("Logs");
 
                     b.Navigation("Replies");
                 });

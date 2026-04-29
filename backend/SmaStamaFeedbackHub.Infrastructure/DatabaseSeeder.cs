@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using SmaStamaFeedbackHub.Entities;
+using SmaStamaFeedbackHub.Contracts.Enums;
 
 namespace SmaStamaFeedbackHub.Infrastructure;
 
 public static class DatabaseSeeder
 {
-    private const int CURRENT_SEED_VERSION = 9;
+    private const int CURRENT_SEED_VERSION = 13;
 
     public static async Task SeedAsync(AppDbContext context)
     {
@@ -20,108 +21,74 @@ public static class DatabaseSeeder
         {
             Console.WriteLine($"[Seeder] Upgrading database from v{currentVersion} to v{CURRENT_SEED_VERSION}...");
             
-            // Wipe existing data (Order matters for constraints)
-            Console.WriteLine("[Seeder] Wiping old data...");
+            // Wipe existing data
+            await context.Notifications.ExecuteDeleteAsync();
+            await context.Attachments.ExecuteDeleteAsync();
+            await context.FeedbackLogs.ExecuteDeleteAsync();
             await context.Feedbacks.ExecuteDeleteAsync();
             await context.Users.ExecuteDeleteAsync();
-            await context.ForbiddenWords.ExecuteDeleteAsync();
 
-            Console.WriteLine("[Seeder] Seeding users...");
-            var admin = new User
+            Console.WriteLine("[Seeder] Seeding 3 Admins...");
+            var admins = new List<User>
             {
-                Id = Guid.Parse("A0000000-0000-0000-0000-000000000001"),
-                Code = "ADMIN001",
-                FullName = "System Administrator",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-                Role = UserRole.Administrator,
-                IsActive = true,
-                MustChangePassword = true
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Code = "ADMIN001",
+                    FullName = "Head Administrator",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    Role = UserRole.Administrator,
+                    IsActive = true,
+                    MustChangePassword = false
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Code = "ADMIN002",
+                    FullName = "Staff Admin Sarah",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    Role = UserRole.Administrator,
+                    IsActive = true,
+                    MustChangePassword = false
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Code = "ADMIN003",
+                    FullName = "Staff Admin Linda",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    Role = UserRole.Administrator,
+                    IsActive = true,
+                    MustChangePassword = false
+                }
             };
 
-            var student1 = new User
+            Console.WriteLine("[Seeder] Seeding 20 Female Students...");
+            var femaleNames = new[] {
+                "Alya Putri", "Bunga Lestari", "Citra Kirana", "Dian Sastrowardoyo", "Eka Wahyuni",
+                "Fitri Handayani", "Gita Gutawa", "Hana Pertiwi", "Indah Permatasari", "Juwita Bahar",
+                "Kartika Sari", "Lestari Ayu", "Maya Kartika", "Nia Ramadhani", "Olivia Jensen",
+                "Putri Marino", "Qory Sandioriva", "Rossa Roslaina", "Siti Nurhaliza", "Tiara Andini"
+            };
+
+            var students = femaleNames.Select((name, i) => new User
             {
-                Id = Guid.Parse("B0000000-0000-0000-0000-000000000001"),
-                Code = "2023001",
-                FullName = "John Doe",
+                Id = Guid.NewGuid(),
+                Code = $"202400{i+1:D2}",
+                FullName = name,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
                 Role = UserRole.Student,
-                BatchYear = 2023,
+                BatchYear = 2024,
                 IsActive = true,
                 MustChangePassword = true
-            };
+            }).ToList();
 
-            var student2 = new User
-            {
-                Id = Guid.Parse("B0000000-0000-0000-0000-000000000002"),
-                Code = "2023002",
-                FullName = "Jane Smith",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
-                Role = UserRole.Student,
-                BatchYear = 2023,
-                IsActive = true,
-                MustChangePassword = true
-            };
-
-            var oldStudent = new User
-            {
-                Id = Guid.Parse("B0000000-0000-0000-0000-000000000003"),
-                Code = "2020001",
-                FullName = "Graduated Student",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
-                Role = UserRole.Student,
-                BatchYear = 2020,
-                IsActive = true,
-                MustChangePassword = true
-            };
-
-            context.Users.AddRange(admin, student1, student2, oldStudent);
+            context.Users.AddRange(admins);
+            context.Users.AddRange(students);
             await context.SaveChangesAsync();
 
-            // Seed Feedbacks using the new FIXED ids
-            var feedback1 = new Feedback
-            {
-                Id = Guid.NewGuid(),
-                Title = "Library Needs New Books",
-                Content = "The science section is outdated. We need 2024 editions.",
-                CreatedAt = DateTime.UtcNow.AddDays(-2),
-                OwnerId = student1.Id,
-                IsFlagged = false
-            };
+            Console.WriteLine("[Seeder] Skipping feedback threads as requested.");
 
-            var feedback2 = new Feedback
-            {
-                Id = Guid.NewGuid(),
-                Title = "Cafeteria Prices",
-                Content = "Prices have increased by 20% this semester. It's too much for students.",
-                CreatedAt = DateTime.UtcNow.AddDays(-1),
-                OwnerId = student2.Id,
-                IsFlagged = false
-            };
-
-            var flaggedFeedback = new Feedback
-            {
-                Id = Guid.NewGuid(),
-                Title = "System is BAD!!",
-                Content = "I hate everything about this school! badword badword!",
-                CreatedAt = DateTime.UtcNow,
-                OwnerId = student1.Id,
-                IsFlagged = true,
-                FlagReason = "Inappropriate language detected by automated safety filter."
-            };
-
-            context.Feedbacks.AddRange(feedback1, feedback2, flaggedFeedback);
-            
-            // Seed Forbidden Words
-            var forbiddenWords = new List<ForbiddenWord>
-            {
-                new() { Word = "badword" },
-                new() { Word = "toxic" },
-                new() { Word = "hate" },
-                new() { Word = "insult" }
-            };
-            context.ForbiddenWords.AddRange(forbiddenWords);
-
-            // Update Version
             // Update Version
             if (versionMeta == null)
             {
@@ -135,7 +102,7 @@ public static class DatabaseSeeder
             }
 
             await context.SaveChangesAsync();
-            Console.WriteLine($"[Seeder] Successfully upgraded to v{CURRENT_SEED_VERSION}. John Doe (2023001) is ready.");
+            Console.WriteLine($"[Seeder] Successfully upgraded to v{CURRENT_SEED_VERSION}. 20 Female Students and 3 Admins are ready.");
         }
         else
         {

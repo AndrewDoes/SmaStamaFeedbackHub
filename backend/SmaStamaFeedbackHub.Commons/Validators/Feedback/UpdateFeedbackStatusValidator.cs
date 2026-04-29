@@ -11,6 +11,11 @@ public class UpdateFeedbackStatusValidator : AbstractValidator<UpdateFeedbackSta
             .NotEmpty().WithMessage("Feedback ID is required.");
 
         RuleFor(x => x.Status)
-            .IsInEnum().WithMessage("Invalid feedback status. Must be Open (0), InProgress (1), Resolved (2), or Closed (3).");
+            .IsInEnum().WithMessage("Invalid feedback status.");
+
+        RuleFor(x => x.Resolution)
+            .NotEmpty()
+            .When(x => x.Status == SmaStamaFeedbackHub.Contracts.Enums.FeedbackStatus.Resolved)
+            .WithMessage("A resolution conclusion is required when marking feedback as resolved.");
     }
 }

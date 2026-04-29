@@ -4,11 +4,12 @@ using SmaStamaFeedbackHub.Contracts.Requests.Feedback;
 using SmaStamaFeedbackHub.Entities;
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using SmaStamaFeedbackHub.Commons.Services;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 
-public class SubmitFeedbackCommand : CreateFeedbackRequest, IRequest<Guid>, ISafeRequest
+public class SubmitFeedbackCommand : CreateFeedbackRequest, IRequest<Guid>
 {
     public List<IFormFile>? Proofs { get; set; }
 }
@@ -19,6 +20,11 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
     private readonly IUserContext _userContext;
     private readonly IStorageService _storageService;
 
+    private const int MAX_FILES = 5;
+    private const long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    private readonly string[] ALLOWED_TYPES = { "image/jpeg", "image/png", "image/jpg", "application/pdf" };
+    private const int DAILY_LIMIT = 5;
+
     public SubmitFeedbackHandler(AppDbContext context, IUserContext userContext, IStorageService storageService)
     {
         _context = context;
@@ -28,6 +34,32 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
 
     public async Task<Guid> Handle(SubmitFeedbackCommand request, CancellationToken cancellationToken)
     {
+        // 1. Rate Limiting / Daily Quota
+        var today = DateTime.UtcNow.Date;
+        var todayCount = await _context.Feedbacks
+            .CountAsync(f => f.OwnerId == _userContext.UserId && f.CreatedAt >= today && f.ParentId == null, cancellationToken);
+
+        if (todayCount >= DAILY_LIMIT)
+        {
+            throw new InvalidOperationException($"Batas harian umpan balik telah tercapai ({DAILY_LIMIT}). Silakan coba lagi besok.");
+        }
+
+        // 2. Validate Proofs
+        if (request.Proofs != null)
+        {
+            if (request.Proofs.Count > MAX_FILES)
+                throw new InvalidOperationException($"Maksimal {MAX_FILES} lampiran diperbolehkan.");
+
+            foreach (var file in request.Proofs)
+            {
+                if (file.Length > MAX_FILE_SIZE)
+                    throw new InvalidOperationException($"File '{file.FileName}' melebihi batas ukuran 10MB.");
+
+                if (!ALLOWED_TYPES.Contains(file.ContentType.ToLower()))
+                    throw new InvalidOperationException($"File '{file.FileName}' memiliki format yang tidak didukung. Hanya JPG, PNG, dan PDF yang diperbolehkan.");
+            }
+        }
+
         var feedback = new Entities.Feedback
         {
             Id = Guid.NewGuid(),
@@ -39,7 +71,7 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
             Category = request.Category
         };
 
-        // Handle Proofs / Attachments
+        // 3. Handle Proofs / Attachments
         if (request.Proofs != null && request.Proofs.Any())
         {
             foreach (var file in request.Proofs)

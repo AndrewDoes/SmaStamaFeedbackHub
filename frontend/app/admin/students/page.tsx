@@ -21,22 +21,21 @@ export default function StudentDirectoryPage() {
       <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-brand-text-body/30 mb-4 shrink-0">
         <span className="hover:text-brand-primary cursor-pointer" onClick={() => router.push("/admin")}>Admin</span>
         <span>/</span>
-        <span className="text-brand-primary">Student Registry</span>
+        <span className="text-brand-primary">Registri Siswa</span>
       </nav>
 
       <header className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6 shrink-0">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-brand-text-main tracking-tighter italic">
-            Registry<span className="text-brand-primary">.</span>Pro
+          <h1 className="text-4xl font-black text-brand-text-main tracking-tighter">
+            Registri<span className="text-brand-primary"> </span>Siswa
           </h1>
-          <p className="text-brand-text-body/60 text-sm font-medium">Unified management system • {data?.totalCount || 0} entries</p>
         </div>
 
         <div className="w-full lg:w-96">
           <div className="relative group">
             <input
               type="text"
-              placeholder="Live search by name or code..."
+              placeholder="Cari nama atau kode..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); }}
               className="w-full bg-brand-surface pl-12 pr-4 py-4 rounded-[20px] border border-brand-primary/5 focus:border-brand-primary/20 outline-none transition-all shadow-premium text-sm font-medium"
@@ -56,14 +55,12 @@ export default function StudentDirectoryPage() {
         <div className="flex-1 min-h-0 bg-brand-surface rounded-[32px] border border-brand-primary/5 shadow-premium flex flex-col overflow-hidden">
           {/* Scrollable Workspace */}
           <div className="flex-1 overflow-auto no-scrollbar relative">
-            <table className="w-full text-left border-separate border-spacing-0 min-w-[700px]">
+            <table className="w-full text-left border-separate border-spacing-0 min-w-[700px] hidden md:table">
               <thead className="sticky top-0 z-20">
                 <tr className="bg-brand-background/80 backdrop-blur-md">
-                  <th className="pl-10 pr-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Contributor</th>
-                  <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 text-center border-b border-brand-primary/5">Batch</th>
-                  <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 text-center border-b border-brand-primary/5">Stats</th>
-                  <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Status</th>
-                  <th className="pl-6 pr-10 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 text-right border-b border-brand-primary/5">Action</th>
+                  <th className="pl-10 pr-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Kontributor</th>
+                  <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 text-center border-b border-brand-primary/5">Angkatan</th>
+                  <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5 text-right">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/[0.03]">
@@ -85,34 +82,52 @@ export default function StudentDirectoryPage() {
                         {student.batchYear}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="inline-flex flex-col items-center">
-                        <span className="text-xs font-black text-brand-primary leading-none">{student.feedbackCount}</span>
-                        <span className="text-[7px] font-black uppercase text-brand-text-body/20 tracking-tighter">Threads</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
                         <div className={`w-1.5 h-1.5 rounded-full ${student.isActive ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-brand-error"}`} />
                         <span className={`text-[10px] font-black uppercase tracking-widest ${student.isActive ? "text-green-600/80" : "text-brand-error/80"}`}>
-                          {student.isActive ? "Active" : "Locked"}
+                          {student.isActive ? "Aktif" : "Terkunci"}
                         </span>
                       </div>
-                    </td>
-                    <td className="pl-6 pr-10 py-4 text-right">
-                      <button
-                        onClick={() => router.push(`/admin/students/${student.id}`)}
-                        className="p-2.5 bg-brand-primary/5 text-brand-primary rounded-xl hover:bg-brand-primary hover:text-brand-background transition-all shadow-sm"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col divide-y divide-brand-primary/[0.03]">
+              {data?.items.map((student) => (
+                <div
+                  key={student.id}
+                  className="p-6 transition-colors"
+                >
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-brand-primary/5 flex items-center justify-center font-black text-brand-primary text-[10px]">
+                        {student.fullName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-brand-text-main text-xs">{student.fullName}</p>
+                        <p className="text-[8px] font-medium text-brand-text-body/30 tracking-tight">{student.code}</p>
+                      </div>
+                    </div>
+                    <div className={`w-1.5 h-1.5 rounded-full ${student.isActive ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" : "bg-brand-error"}`} />
+                  </div>
+
+                  <div className="flex justify-between items-end">
+                    <div className="flex gap-4">
+                      <div className="flex flex-col">
+                        <span className="text-[7px] font-black uppercase text-brand-text-body/20 tracking-widest mb-1">Angkatan</span>
+                        <span className="text-[9px] font-bold text-brand-text-body/60 px-2 py-0.5 bg-brand-background border border-brand-primary/5 rounded">
+                          {student.batchYear}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
             {(!data?.items || data.items.length === 0) && (
               <div className="h-64 flex flex-col items-center justify-center text-center">
@@ -121,7 +136,7 @@ export default function StudentDirectoryPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                 </div>
-                <p className="text-brand-text-body/30 font-black uppercase tracking-[0.2em] text-[10px]">No registry entries found</p>
+                <p className="text-brand-text-body/30 font-black uppercase tracking-[0.2em] text-[10px]">Tidak ada entri registri ditemukan</p>
               </div>
             )}
           </div>
@@ -131,10 +146,10 @@ export default function StudentDirectoryPage() {
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/30">Registry Synchronized</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/30">Registri Sinkron</span>
               </div>
             </div>
-            <p className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/20">Scroll to view all {data?.totalCount} records</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/20">Gulir untuk melihat semua {data?.totalCount} catatan</p>
           </div>
         </div>
       )}

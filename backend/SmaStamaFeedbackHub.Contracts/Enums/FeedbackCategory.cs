@@ -2,10 +2,10 @@ namespace SmaStamaFeedbackHub.Contracts.Enums;
 
 public enum FeedbackCategory
 {
-    Facilities = 0,
-    Academic = 1,
-    StudentAffairs = 2,
-    Canteen = 3,
-    ReportingSafety = 4,
-    Other = 5
+    Fasilitas = 0,
+    Akademik = 1,
+    Kemahasiswaan = 2,
+    Kantin = 3,
+    LaporanKeamanan = 4,
+    Lainnya = 5
 }

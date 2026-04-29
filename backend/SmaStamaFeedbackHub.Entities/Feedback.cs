@@ -28,7 +28,12 @@ public class Feedback
     public string? FlagReason { get; set; }
 
     public FeedbackStatus Status { get; set; } = FeedbackStatus.Open;
-    public FeedbackCategory Category { get; set; } = FeedbackCategory.Other;
+    public FeedbackCategory Category { get; set; } = FeedbackCategory.Lainnya;
+    
+    public string? Resolution { get; set; }
+    public DateTime? ResolvedAt { get; set; }
+    public bool IsDenied { get; set; }
 
     public List<FeedbackAttachment> Attachments { get; set; } = new();
+    public List<FeedbackLog> Logs { get; set; } = new();
 }

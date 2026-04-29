@@ -11,7 +11,7 @@ export default function ProfilePage() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     setUserData({
@@ -23,12 +23,32 @@ export default function ProfilePage() {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (newPassword !== confirmPassword) {
-        throw new Error("New passwords do not match.");
+      const errors: { [key: string]: string } = {};
+
+      if (!oldPassword) errors.oldPassword = "Kata sandi saat ini wajib diisi.";
+      if (!newPassword) errors.newPassword = "Kata sandi baru wajib diisi.";
+      if (!confirmPassword) errors.confirmPassword = "Konfirmasi kata sandi wajib diisi.";
+
+      if (newPassword && newPassword.length < 8) {
+        errors.newPassword = "Kata sandi harus terdiri dari minimal 8 karakter.";
+      } else if (newPassword && !/[A-Z]/.test(newPassword)) {
+        errors.newPassword = "Kata sandi harus mengandung minimal satu huruf kapital.";
+      } else if (newPassword && !/[0-9]/.test(newPassword)) {
+        errors.newPassword = "Kata sandi harus mengandung minimal satu angka.";
+      } else if (newPassword && !/[\W_]/.test(newPassword)) {
+        errors.newPassword = "Kata sandi harus mengandung minimal satu karakter khusus.";
       }
-      if (newPassword.length < 6) {
-        throw new Error("Password must be at least 6 characters long.");
+
+      if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+        errors.confirmPassword = "Kata sandi baru tidak cocok.";
       }
+
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        throw new Error("Validation failed");
+      }
+
+      setFieldErrors({});
       return api.post("/auth/change-password", {
         oldPassword,
         newPassword,
@@ -36,15 +56,17 @@ export default function ProfilePage() {
       });
     },
     onSuccess: () => {
-      toast.success("Password updated successfully!");
+      toast.success("Kata sandi berhasil diperbarui!");
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setError("");
+      setFieldErrors({});
     },
     onError: (err: any) => {
-      setError(err.response?.data?.message || err.message || "Failed to update password.");
-      toast.error("Failed to update password.");
+      if (err.message !== "Validation failed") {
+        setFieldErrors({ general: err.response?.data?.message || err.message || "Gagal memperbarui kata sandi." });
+        toast.error("Gagal memperbarui kata sandi.");
+      }
     },
   });
 
@@ -53,16 +75,12 @@ export default function ProfilePage() {
       {/* Refined Header */}
       <header className="relative pb-6 border-b border-brand-primary/10">
         <div className="relative z-10">
-          <h1 className="text-3xl font-black text-brand-text-main tracking-tighter mb-2 italic">
-            Dashboard<span className="text-brand-primary">.</span>Profile
+          <h1 className="text-4xl font-black text-brand-text-main tracking-tighter mb-2">
+            Profil<span className="text-brand-primary"> </span>Dasbor
           </h1>
           <div className="flex flex-wrap items-center gap-3">
             <div className="px-3 py-1 bg-brand-primary/10 text-brand-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-brand-primary/10">
-              {userData.role} Account
-            </div>
-            <div className="flex items-center gap-2 text-brand-text-body/40 text-[10px] font-bold uppercase tracking-wider">
-              <div className="w-1 h-1 rounded-full bg-brand-secondary animate-pulse"></div>
-              Portal Secure
+              Akun {userData.role}
             </div>
           </div>
         </div>
@@ -92,19 +110,19 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-2 gap-3 pt-8 border-t border-brand-primary/5">
                 <div className="p-4 bg-brand-background/30 rounded-2xl border border-brand-primary/5">
-                  <p className="text-[9px] font-black text-brand-text-body/30 uppercase tracking-widest mb-1">Account Status</p>
-                  <p className="text-brand-secondary text-xs font-black uppercase">Authorized</p>
+                  <p className="text-[9px] font-black text-brand-text-body/30 uppercase tracking-widest mb-1">Status Akun</p>
+                  <p className="text-brand-secondary text-xs font-black uppercase">Otorisasi</p>
                 </div>
                 <div className="p-4 bg-brand-background/30 rounded-2xl border border-brand-primary/5">
-                  <p className="text-[9px] font-black text-brand-text-body/30 uppercase tracking-widest mb-1">Privacy Level</p>
-                  <p className="text-brand-text-main text-xs font-black uppercase italic">Secured</p>
+                  <p className="text-[9px] font-black text-brand-text-body/30 uppercase tracking-widest mb-1">Tingkat Privasi</p>
+                  <p className="text-brand-text-main text-xs font-black uppercase">Aman</p>
                 </div>
               </div>
 
               <div className="mt-8 p-4 bg-brand-primary/5 rounded-2xl border border-brand-primary/10">
-                <p className="text-[10px] text-brand-primary/70 font-bold flex items-center gap-2 italic">
+                <p className="text-[10px] text-brand-primary/70 font-bold flex items-center gap-2">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  Internal student identity remains anonymous within feedback clusters.
+                  Identitas siswa tetap anonim dalam kelompok umpan balik.
                 </p>
               </div>
             </div>
@@ -114,7 +132,7 @@ export default function ProfilePage() {
             onClick={() => authService.logout()}
             className="group w-full py-4 px-6 bg-brand-error/5 text-brand-error text-xs font-bold rounded-2xl border border-brand-error/10 hover:bg-brand-error/10 transition-all flex items-center justify-between"
           >
-            <span className="tracking-widest uppercase">Terminate Session</span>
+            <span className="tracking-widest uppercase">Akhiri Sesi</span>
             <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
@@ -124,8 +142,8 @@ export default function ProfilePage() {
         {/* Column 2: Security Controls */}
         <section className="bg-brand-surface p-8 rounded-[32px] border border-brand-primary/5 shadow-premium flex flex-col justify-between">
           <div className="mb-8">
-            <h3 className="text-lg font-black text-brand-text-main tracking-tight uppercase mb-1">Security Dashboard</h3>
-            <p className="text-brand-text-body/40 text-[10px] font-bold italic">Credentials should be updated periodically.</p>
+            <h3 className="text-lg font-black text-brand-text-main tracking-tight uppercase mb-1">Dasbor Keamanan</h3>
+            <p className="text-brand-text-body/40 text-[10px] font-bold">Kredensial sebaiknya diperbarui secara berkala.</p>
           </div>
 
           <form
@@ -135,46 +153,55 @@ export default function ProfilePage() {
             }}
             className="space-y-5"
           >
-            {error && (
+            {fieldErrors.general && (
               <div className="p-3 bg-brand-error/10 border border-brand-error/20 text-brand-error text-[10px] font-black rounded-xl">
-                {error}
+                {fieldErrors.general}
               </div>
             )}
 
             <div className="space-y-1.5">
-              <label className="text-[9px] font-black text-brand-text-main/40 uppercase tracking-[0.2em] ml-1">Current Key</label>
+              <label className="text-[9px] font-black text-brand-text-main/40 uppercase tracking-[0.2em] ml-1">Kunci Saat Ini</label>
               <input
                 type="password"
                 value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                className="w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border border-brand-primary/5 focus:border-brand-primary/20 outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold"
+                onChange={(e) => {
+                  setOldPassword(e.target.value);
+                  if (fieldErrors.oldPassword) setFieldErrors(prev => ({ ...prev, oldPassword: "" }));
+                }}
+                className={`w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border ${fieldErrors.oldPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/5 focus:border-brand-primary/20'} outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold`}
                 placeholder="••••••••"
-                required
               />
+              {fieldErrors.oldPassword && <p className="text-[9px] font-bold text-brand-error ml-1">{fieldErrors.oldPassword}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-brand-text-main/40 uppercase tracking-[0.2em] ml-1">New Key</label>
+                <label className="text-[9px] font-black text-brand-text-main/40 uppercase tracking-[0.2em] ml-1">Kunci Baru</label>
                 <input
                   type="password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border border-brand-primary/5 focus:border-brand-primary/20 outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold"
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    if (fieldErrors.newPassword) setFieldErrors(prev => ({ ...prev, newPassword: "" }));
+                  }}
+                  className={`w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border ${fieldErrors.newPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/5 focus:border-brand-primary/20'} outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold`}
                   placeholder="••••••••"
-                  required
                 />
+                {fieldErrors.newPassword && <p className="text-[9px] font-bold text-brand-error ml-1">{fieldErrors.newPassword}</p>}
               </div>
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-brand-text-main/40 uppercase tracking-[0.2em] ml-1">Repeat</label>
+                <label className="text-[9px] font-black text-brand-text-main/40 uppercase tracking-[0.2em] ml-1">Konfirmasi Ulang</label>
                 <input
                   type="password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border border-brand-primary/5 focus:border-brand-primary/20 outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold"
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (fieldErrors.confirmPassword) setFieldErrors(prev => ({ ...prev, confirmPassword: "" }));
+                  }}
+                  className={`w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border ${fieldErrors.confirmPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/5 focus:border-brand-primary/20'} outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold`}
                   placeholder="••••••••"
-                  required
                 />
+                {fieldErrors.confirmPassword && <p className="text-[9px] font-bold text-brand-error ml-1">{fieldErrors.confirmPassword}</p>}
               </div>
             </div>
 
@@ -183,7 +210,7 @@ export default function ProfilePage() {
               disabled={mutation.isPending}
               className="w-full mt-2 py-4 bg-brand-primary text-brand-background font-black rounded-2xl shadow-lg hover:brightness-105 active:scale-[0.98] transition-all disabled:opacity-50 tracking-widest uppercase text-[10px]"
             >
-              {mutation.isPending ? "Syncing..." : "Update Security Credentials"}
+              {mutation.isPending ? "Sinkronisasi..." : "Perbarui Kredensial Keamanan"}
             </button>
           </form>
         </section>

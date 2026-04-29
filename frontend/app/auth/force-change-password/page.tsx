@@ -10,16 +10,36 @@ export default function ForceChangePasswordPage() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (newPassword !== confirmPassword) {
-        throw new Error("New passwords do not match.");
+      const errors: { [key: string]: string } = {};
+      
+      if (!oldPassword) errors.oldPassword = "Current password is required.";
+      if (!newPassword) errors.newPassword = "New password is required.";
+      if (!confirmPassword) errors.confirmPassword = "Please confirm your new password.";
+      
+      if (newPassword && newPassword.length < 8) {
+        errors.newPassword = "Password must be at least 8 characters long.";
+      } else if (newPassword && !/[A-Z]/.test(newPassword)) {
+        errors.newPassword = "Password must contain at least one uppercase letter.";
+      } else if (newPassword && !/[0-9]/.test(newPassword)) {
+        errors.newPassword = "Password must contain at least one number.";
+      } else if (newPassword && !/[\W_]/.test(newPassword)) {
+        errors.newPassword = "Password must contain at least one special character.";
       }
-      if (newPassword.length < 6) {
-        throw new Error("Password must be at least 6 characters long.");
+      
+      if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+        errors.confirmPassword = "New passwords do not match.";
       }
+
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        throw new Error("Validation failed");
+      }
+
+      setFieldErrors({});
       return api.post("/auth/change-password", {
         oldPassword,
         newPassword,
@@ -31,7 +51,9 @@ export default function ForceChangePasswordPage() {
       window.location.href = "/";
     },
     onError: (err: any) => {
-      setError(err.response?.data?.message || err.message || "Failed to update password.");
+      if (err.message !== "Validation failed") {
+        setFieldErrors({ general: err.response?.data?.message || err.message || "Failed to update password." });
+      }
     },
   });
 
@@ -61,9 +83,9 @@ export default function ForceChangePasswordPage() {
           }}
           className="space-y-6"
         >
-          {error && (
+          {fieldErrors.general && (
             <div className="p-4 bg-brand-error/10 border border-brand-error/20 text-brand-error text-xs font-bold rounded-2xl animate-in fade-in slide-in-from-top-2">
-              {error}
+              {fieldErrors.general}
             </div>
           )}
 
@@ -72,11 +94,14 @@ export default function ForceChangePasswordPage() {
             <input
               type="password"
               value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-brand-background/30 border border-brand-primary/10 focus:border-brand-primary outline-none transition-all placeholder:text-brand-text-body/20 font-medium"
+              onChange={(e) => {
+                setOldPassword(e.target.value);
+                if (fieldErrors.oldPassword) setFieldErrors(prev => ({ ...prev, oldPassword: "" }));
+              }}
+              className={`w-full px-6 py-4 rounded-2xl bg-brand-background/30 border ${fieldErrors.oldPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/10 focus:border-brand-primary'} outline-none transition-all placeholder:text-brand-text-body/20 font-medium`}
               placeholder="••••••••"
-              required
             />
+            {fieldErrors.oldPassword && <p className="text-[10px] font-bold text-brand-error ml-1">{fieldErrors.oldPassword}</p>}
           </div>
 
           <div className="space-y-2">
@@ -84,11 +109,14 @@ export default function ForceChangePasswordPage() {
             <input
               type="password"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-brand-background/30 border border-brand-primary/10 focus:border-brand-primary outline-none transition-all placeholder:text-brand-text-body/20 font-medium"
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                if (fieldErrors.newPassword) setFieldErrors(prev => ({ ...prev, newPassword: "" }));
+              }}
+              className={`w-full px-6 py-4 rounded-2xl bg-brand-background/30 border ${fieldErrors.newPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/10 focus:border-brand-primary'} outline-none transition-all placeholder:text-brand-text-body/20 font-medium`}
               placeholder="••••••••"
-              required
             />
+            {fieldErrors.newPassword && <p className="text-[10px] font-bold text-brand-error ml-1">{fieldErrors.newPassword}</p>}
           </div>
 
           <div className="space-y-2">
@@ -96,11 +124,14 @@ export default function ForceChangePasswordPage() {
             <input
               type="password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-6 py-4 rounded-2xl bg-brand-background/30 border border-brand-primary/10 focus:border-brand-primary outline-none transition-all placeholder:text-brand-text-body/20 font-medium"
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (fieldErrors.confirmPassword) setFieldErrors(prev => ({ ...prev, confirmPassword: "" }));
+              }}
+              className={`w-full px-6 py-4 rounded-2xl bg-brand-background/30 border ${fieldErrors.confirmPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/10 focus:border-brand-primary'} outline-none transition-all placeholder:text-brand-text-body/20 font-medium`}
               placeholder="••••••••"
-              required
             />
+            {fieldErrors.confirmPassword && <p className="text-[10px] font-bold text-brand-error ml-1">{fieldErrors.confirmPassword}</p>}
           </div>
 
           <button

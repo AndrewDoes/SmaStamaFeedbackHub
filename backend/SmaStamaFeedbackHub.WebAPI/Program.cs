@@ -48,15 +48,14 @@ builder.Services.AddValidatorsFromAssembly(typeof(IJwtService).Assembly);
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(GetFeedbackListQuery).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(SafetyFilterBehavior<,>));
 });
 
 // DI
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserContext, UserContext>();
-builder.Services.AddScoped<ISafetyFilter, ForbiddenWordsService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IStorageService, AzureBlobStorageService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddHostedService<DeactivationBackgroundService>();
 
 var app = builder.Build();
@@ -65,7 +64,15 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DatabaseSeeder.SeedAsync(context);
+    try 
+    {
+        await DatabaseSeeder.SeedAsync(context);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[CRITICAL] Database Seeding Failed: {ex.Message}");
+        Console.WriteLine(ex.StackTrace);
+    }
 }
 
 // Configure the HTTP request pipeline.

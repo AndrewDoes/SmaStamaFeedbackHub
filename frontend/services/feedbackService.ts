@@ -1,5 +1,20 @@
 import api from "./api";
 
+export interface AuditLogDto {
+  id: string;
+  adminName: string;
+  action: string;
+  oldValue: string;
+  newValue: string;
+  createdAt: string;
+}
+
+export interface AttachmentDto {
+  id: string;
+  url: string;
+  fileName: string;
+}
+
 export interface FeedbackDto {
   id: string;
   title: string;
@@ -9,10 +24,14 @@ export interface FeedbackDto {
   status: number; // 0: Open, 1: InProgress, 2: Resolved, 3: Closed
   category: number;
   replies: FeedbackDto[];
-  attachmentUrls?: string[];
+  attachments: AttachmentDto[];
+  auditLogs?: AuditLogDto[];
   isStaffResponse: boolean;
   authorName: string;
   isAuthor: boolean;
+  resolution?: string;
+  resolvedAt?: string;
+  isDenied: boolean;
 }
 
 export interface PagedResult<T> {
@@ -23,11 +42,8 @@ export interface PagedResult<T> {
 }
 
 export const feedbackService = {
-  getFeedbacks: async (options: { pageNumber?: number; pageSize?: number; search?: string; status?: number } = {}): Promise<PagedResult<FeedbackDto>> => {
-    const { pageNumber = 1, pageSize = 10, search, status } = options;
-    const response = await api.get<PagedResult<FeedbackDto>>("/Feedback/GetFeedbackList", {
-      params: { pageNumber, pageSize, search, status }
-    });
+  getFeedbacks: async (params?: { category?: number; status?: number; search?: string; pageNumber?: number; pageSize?: number; isHistory?: boolean }): Promise<PagedResult<FeedbackDto>> => {
+    const response = await api.get<PagedResult<FeedbackDto>>("/Feedback/GetFeedbackList", { params });
     return response.data;
   },
 
@@ -43,7 +59,7 @@ export const feedbackService = {
     formData.append("title", title);
     formData.append("content", content);
     formData.append("category", category.toString());
-    
+
     if (proofs && proofs.length > 0) {
       proofs.forEach((file) => {
         formData.append("proofs", file);
@@ -71,8 +87,8 @@ export const feedbackService = {
     return response.data;
   },
 
-  updateFeedbackStatus: async (id: string, status: number): Promise<void> => {
-    await api.patch("/Feedback/UpdateStatus", { id, status });
+  updateFeedbackStatus: async (id: string, status: number, resolution?: string, isDenied?: boolean): Promise<any> => {
+    return api.patch(`/Feedback/UpdateStatus`, { id, status, resolution, isDenied });
   },
 
   getFlaggedList: async (): Promise<FeedbackDto[]> => {
@@ -86,5 +102,15 @@ export const feedbackService = {
 
   resolveFeedbackFlag: async (feedbackId: string): Promise<void> => {
     await api.post("/Feedback/ResolveFlag", { feedbackId });
+  },
+
+  deleteFeedback: async (id: string): Promise<void> => {
+    await api.delete(`/Feedback/${id}`);
+  },
+
+  updateFeedback: async (formData: FormData): Promise<void> => {
+    await api.put("/Feedback/UpdateFeedback", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
   }
 };

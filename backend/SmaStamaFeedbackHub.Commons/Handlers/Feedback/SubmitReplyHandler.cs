@@ -1,11 +1,12 @@
 using MediatR;
-using SmaStamaFeedbackHub.Commons.Behaviors;
+using SmaStamaFeedbackHub.Commons.Services;
+using SmaStamaFeedbackHub.Contracts.Enums;
 using SmaStamaFeedbackHub.Contracts.Requests.Feedback;
 using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Feedback;
 
-public class SubmitReplyCommand : ReplyToFeedbackRequest, IRequest<Guid>, ISafeRequest
+public class SubmitReplyCommand : ReplyToFeedbackRequest, IRequest<Guid>
 {
     public string Title => ""; // Replies don't have titles
 }
@@ -14,20 +15,26 @@ public class SubmitReplyHandler : IRequestHandler<SubmitReplyCommand, Guid>
 {
     private readonly AppDbContext _context;
     private readonly IUserContext _userContext;
+    private readonly INotificationService _notificationService;
 
-    public SubmitReplyHandler(AppDbContext context, IUserContext userContext)
+    public SubmitReplyHandler(AppDbContext context, IUserContext userContext, INotificationService notificationService)
     {
         _context = context;
         _userContext = userContext;
+        _notificationService = notificationService;
     }
 
     public async Task<Guid> Handle(SubmitReplyCommand request, CancellationToken cancellationToken)
     {
         // 1. Check if parent exists
         var parent = await _context.Feedbacks.FindAsync(request.ParentId);
-        if (parent == null) throw new KeyNotFoundException("The feedback you are replying to does not exist.");
+        if (parent == null) throw new KeyNotFoundException("Umpan balik yang Anda balas tidak ada.");
 
-        if (parent == null) throw new KeyNotFoundException("The feedback you are replying to does not exist.");
+        // 2. Workflow Check: No replies until InProgress
+        if (parent.Status == FeedbackStatus.Open)
+        {
+            throw new InvalidOperationException("Utas ini masih dalam antrean. Balasan hanya diaktifkan setelah dipindahkan ke 'Sedang Diproses' oleh administrator.");
+        }
 
         // 3. Create reply (which is just a Feedback with a ParentId)
         var reply = new Entities.Feedback
@@ -43,6 +50,28 @@ public class SubmitReplyHandler : IRequestHandler<SubmitReplyCommand, Guid>
 
         _context.Feedbacks.Add(reply);
         await _context.SaveChangesAsync(cancellationToken);
+
+        // 4. Notify recipient
+        if (_userContext.Role == UserRole.Administrator)
+        {
+            // Admin replied -> Notify Student (parent.OwnerId)
+            await _notificationService.SendNotificationAsync(
+                parent.OwnerId,
+                "Balasan Administratif Baru",
+                $"Administrator telah membalas utas Anda '{parent.Title}'.",
+                $"/feedback/{parent.Id}"
+            );
+        }
+        else if (_userContext.UserId != parent.OwnerId)
+        {
+            // Someone else (maybe admin via different path or user-to-user if allowed) replied
+            await _notificationService.SendNotificationAsync(
+                parent.OwnerId,
+                "Balasan Baru",
+                $"Seseorang telah membalas utas Anda '{parent.Title}'.",
+                $"/feedback/{parent.Id}"
+            );
+        }
 
         return reply.Id;
     }

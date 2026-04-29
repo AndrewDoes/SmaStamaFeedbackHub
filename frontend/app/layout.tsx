@@ -19,6 +19,11 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: "SmaStama Feedback Hub",
   description: "Official Feedback Portal for SMA Santa Maria Yogyakarta",
+  icons: {
+    icon: 'https://stamayk.sch.id/icons/logostamayk.svg',
+    shortcut: 'https://stamayk.sch.id/icons/logostamayk.svg',
+    apple: 'https://stamayk.sch.id/icons/logostamayk.svg',
+  }
 };
 
 export default function RootLayout({

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/auth";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [code, setCode] = useState("");
@@ -17,23 +18,30 @@ export default function LoginPage() {
     setError("");
 
     try {
-      await authService.login(code, password);
-      router.push("/");
+      const user = await authService.login(code, password);
+      const role = user.role || user.Role;
+      if (role === "Administrator") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid credentials. Please try again.");
+      setError(err.response?.data?.message || "Kredensial tidak valid. Silakan coba lagi.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden font-sans bg-brand-background">
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden font-sans bg-brand-background">
+      {/* Logo */}
+      <Image src={'https://stamayk.sch.id/icons/logostamayk.svg'} alt="Logo" width={64} height={64} className="rounded-lg" />
       {/* Login Card */}
       <div className="relative z-10 w-full max-w-md px-6 py-12 mx-auto">
         <div className="bg-brand-surface/80 dark:bg-brand-surface/90 backdrop-blur-xl rounded-2xl shadow-premium border border-brand-primary/10 p-8 md:p-10">
           <div className="text-center mb-10">
             <h1 className="text-3xl md:text-4xl mb-2 text-brand-text-main">
-              Feedback Hub
+              Stama Listen
             </h1>
             <p className="text-brand-text-body/80 font-medium">
               SMA Santa Maria Yogyakarta
@@ -43,21 +51,21 @@ export default function LoginPage() {
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-brand-text-main mb-2">
-                Student ID / Code
+                ID Siswa / Kode
               </label>
               <input
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-brand-surface/50 dark:bg-brand-background/20 border border-brand-primary/10 focus:border-brand-secondary focus:ring-2 focus:ring-brand-secondary/20 outline-none transition-all placeholder:text-brand-text-muted"
-                placeholder="Enter your ID"
+                placeholder="Masukkan ID Anda"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-brand-text-main mb-2">
-                Password
+                Kata Sandi
               </label>
               <input
                 type="password"
@@ -84,7 +92,7 @@ export default function LoginPage() {
                 <div className="w-5 h-5 border-2 border-brand-background/30 border-t-brand-background rounded-full animate-spin"></div>
               ) : (
                 <>
-                  Sign In
+                  Masuk
                   <svg
                     className="w-5 h-5 group-hover:translate-x-1 transition-transform"
                     fill="none"
@@ -105,7 +113,7 @@ export default function LoginPage() {
 
           <div className="mt-8 pt-8 border-t border-brand-primary/10 text-center">
             <p className="text-sm text-brand-text-body/60">
-              Technical issues? Contact the IT Department.
+              Masalah teknis? Hubungi Departemen IT.
             </p>
           </div>
         </div>

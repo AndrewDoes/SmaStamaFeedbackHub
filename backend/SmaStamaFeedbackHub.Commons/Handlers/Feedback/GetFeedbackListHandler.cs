@@ -13,6 +13,7 @@ public class GetFeedbackListQuery : IRequest<PagedResult<FeedbackDto>>
     public int PageSize { get; set; } = 10;
     public string? Search { get; set; }
     public FeedbackStatus? Status { get; set; }
+    public bool IsHistory { get; set; } = false;
 }
 
 public class GetFeedbackListHandler : IRequestHandler<GetFeedbackListQuery, PagedResult<FeedbackDto>>
@@ -46,7 +47,11 @@ public class GetFeedbackListHandler : IRequestHandler<GetFeedbackListQuery, Page
         }
 
         // 3. Status Filter
-        if (request.Status.HasValue)
+        if (request.IsHistory)
+        {
+            query = query.Where(f => f.Status == FeedbackStatus.Resolved);
+        }
+        else if (request.Status.HasValue)
         {
             query = query.Where(f => f.Status == request.Status.Value);
         }
@@ -72,7 +77,10 @@ public class GetFeedbackListHandler : IRequestHandler<GetFeedbackListQuery, Page
                 CreatedAt = f.CreatedAt,
                 IsFlagged = f.IsFlagged,
                 Status = f.Status,
-                Category = f.Category
+                Category = f.Category,
+                Resolution = f.Resolution,
+                ResolvedAt = f.ResolvedAt,
+                IsDenied = f.IsDenied
             })
             .ToListAsync(cancellationToken);
 
