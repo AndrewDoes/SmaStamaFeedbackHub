@@ -12,7 +12,10 @@ public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRe
 
         RuleFor(x => x.NewPassword)
             .NotEmpty().WithMessage("New password is required.")
-            .MinimumLength(6).WithMessage("New password must be at least 6 characters long.")
+            .MinimumLength(8).WithMessage("New password must be at least 8 characters long.")
+            .Matches(@"[A-Z]").WithMessage("New password must contain at least one uppercase letter.")
+            .Matches(@"[0-9]").WithMessage("New password must contain at least one number.")
+            .Matches(@"[\W_]").WithMessage("New password must contain at least one special character.")
             .NotEqual(x => x.OldPassword).WithMessage("New password cannot be the same as the current password.");
     }
 }

@@ -88,7 +88,7 @@ export default function LandingPage() {
 
       <div className="grid grid-cols-1">
         {/* Main Feedback List */}
-        <div className="bg-brand-surface rounded-2xl shadow-premium border border-brand-primary/5 col-span-1 lg:col-span-2 min-h-[500px] flex flex-col overflow-hidden">
+        <div className="bg-brand-surface rounded-2xl shadow-premium border-2 border-brand-primary/20 col-span-1 lg:col-span-2 min-h-[500px] flex flex-col overflow-hidden">
           <div className="p-5 md:p-8 flex-1">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <h2 className="text-xl md:text-2xl text-brand-text-main font-bold flex items-center gap-2">
@@ -100,7 +100,7 @@ export default function LandingPage() {
                   <button
                     key={String(f)}
                     onClick={() => setActiveFilter(f)}
-                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all ${activeFilter === f
+                    className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all text-center ${activeFilter === f
                       ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20"
                       : "text-brand-text-body/40 hover:text-brand-text-body/60"
                       }`}
@@ -122,24 +122,24 @@ export default function LandingPage() {
                   <div
                     key={fb.id}
                     onClick={() => router.push(`/feedback/${fb.id}`)}
-                    className="p-6 bg-brand-surface border border-brand-primary/5 hover:border-brand-primary/20 hover:bg-brand-primary/[0.01] rounded-[24px] transition-all cursor-pointer group shadow-sm hover:shadow-premium"
+                    className="p-6 bg-brand-surface border-2 border-brand-primary/10 hover:border-brand-primary/30 hover:bg-brand-primary/[0.02] rounded-[24px] transition-all cursor-pointer group shadow-sm hover:shadow-premium"
                   >
-                    <div className="flex justify-between items-start flex flex-col md:flex-row gap-4 mb-4">
-                      <h3 className="font-bold text-brand-text-main group-hover:text-brand-primary transition-colors">{fb.title}</h3>
-                      <div className="flex gap-2 items-center">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                      <h3 className="font-bold text-brand-text-main group-hover:text-brand-primary transition-colors text-lg leading-tight">{fb.title}</h3>
+                      <div className="flex flex-wrap gap-2 items-center">
                         {fb.isFlagged && (
-                          <span className="w-2 h-2 bg-brand-error rounded-full" title="Flagged content" />
+                          <span className="w-2 h-2 bg-brand-error rounded-full shrink-0" title="Flagged content" />
                         )}
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tighter border ${getCategoryDetails(fb.category).color}`}>
+                        <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-tighter border shrink-0 ${getCategoryDetails(fb.category).color}`}>
                           {getCategoryDetails(fb.category).label}
                         </span>
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-tighter border ${fb.status === 2 ? (fb.isDenied ? "bg-brand-text-body/10 text-brand-text-body/60 border-brand-text-body/20" : "bg-brand-success/10 text-brand-success border-brand-success/20") :
+                        <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-tighter border shrink-0 ${fb.status === 2 ? (fb.isDenied ? "bg-brand-text-body/10 text-brand-text-body/60 border-brand-text-body/20" : "bg-brand-success/10 text-brand-success border-brand-success/20") :
                           fb.status === 1 ? "bg-brand-warning/10 text-brand-warning border-brand-warning/20" :
                             "bg-brand-primary/10 text-brand-primary border-brand-primary/20"
                           }`}>
                           {fb.status === 2 ? (fb.isDenied ? "Ditolak" : "Selesai") : fb.status === 1 ? "Sedang Diproses" : "Aktif"}
                         </span>
-                        <span className="text-xs text-brand-text-body/50">
+                        <span className="text-[10px] text-brand-text-body/40 font-medium ml-auto sm:ml-0">
                           {new Date(fb.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}
                         </span>
                       </div>

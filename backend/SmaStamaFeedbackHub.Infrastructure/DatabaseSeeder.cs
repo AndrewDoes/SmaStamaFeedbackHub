@@ -6,7 +6,7 @@ namespace SmaStamaFeedbackHub.Infrastructure;
 
 public static class DatabaseSeeder
 {
-    private const int CURRENT_SEED_VERSION = 12;
+    private const int CURRENT_SEED_VERSION = 13;
 
     public static async Task SeedAsync(AppDbContext context)
     {
@@ -29,23 +29,53 @@ public static class DatabaseSeeder
             await context.Users.ExecuteDeleteAsync();
 
             Console.WriteLine("[Seeder] Seeding 3 Admins...");
-            var admins = Enumerable.Range(1, 3).Select(i => new User
+            var admins = new List<User>
             {
-                Id = Guid.NewGuid(),
-                Code = $"ADMIN00{i}",
-                FullName = i == 1 ? "Head Administrator" : $"Staff Admin {i}",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-                Role = UserRole.Administrator,
-                IsActive = true,
-                MustChangePassword = i == 1
-            }).ToList();
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Code = "ADMIN001",
+                    FullName = "Head Administrator",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    Role = UserRole.Administrator,
+                    IsActive = true,
+                    MustChangePassword = false
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Code = "ADMIN002",
+                    FullName = "Staff Admin Sarah",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    Role = UserRole.Administrator,
+                    IsActive = true,
+                    MustChangePassword = false
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Code = "ADMIN003",
+                    FullName = "Staff Admin Linda",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                    Role = UserRole.Administrator,
+                    IsActive = true,
+                    MustChangePassword = false
+                }
+            };
 
-            Console.WriteLine("[Seeder] Seeding 10 Students...");
-            var students = Enumerable.Range(1, 10).Select(i => new User
+            Console.WriteLine("[Seeder] Seeding 20 Female Students...");
+            var femaleNames = new[] {
+                "Alya Putri", "Bunga Lestari", "Citra Kirana", "Dian Sastrowardoyo", "Eka Wahyuni",
+                "Fitri Handayani", "Gita Gutawa", "Hana Pertiwi", "Indah Permatasari", "Juwita Bahar",
+                "Kartika Sari", "Lestari Ayu", "Maya Kartika", "Nia Ramadhani", "Olivia Jensen",
+                "Putri Marino", "Qory Sandioriva", "Rossa Roslaina", "Siti Nurhaliza", "Tiara Andini"
+            };
+
+            var students = femaleNames.Select((name, i) => new User
             {
                 Id = Guid.NewGuid(),
-                Code = $"202400{i:D2}",
-                FullName = i == 1 ? "John Doe" : i == 2 ? "Jane Smith" : $"Student User {i}",
+                Code = $"202400{i+1:D2}",
+                FullName = name,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
                 Role = UserRole.Student,
                 BatchYear = 2024,
@@ -57,44 +87,7 @@ public static class DatabaseSeeder
             context.Users.AddRange(students);
             await context.SaveChangesAsync();
 
-            Console.WriteLine("[Seeder] Seeding feedback threads...");
-            var feedbackTitles = new[] { 
-                "Library wifi is extremely slow during exams", 
-                "More variety needed in the school cafeteria", 
-                "Basketball court hoop needs immediate repair", 
-                "Request for new literature books (2024 editions)", 
-                "Chemistry lab safety equipment inspection", 
-                "Additional student parking spaces near Block C",
-                "Late night study room access request", 
-                "Malfunctioning water fountain in the main hall", 
-                "More trash cans needed in the school yard",
-                "Inquiry about student council election dates", 
-                "Lost and Found department accessibility"
-            };
-
-            var random = new Random();
-            foreach(var student in students)
-            {
-                // Most students (9 out of 10) have at least 1 feedback
-                if (student.Code != "20240010") 
-                {
-                    int count = random.Next(1, 3); // 1 or 2 feedbacks per student
-                    for(int j = 0; j < count; j++)
-                    {
-                        context.Feedbacks.Add(new Feedback
-                        {
-                            Id = Guid.NewGuid(),
-                            Title = feedbackTitles[random.Next(feedbackTitles.Length)],
-                            Content = "This is a detailed feedback report for administrative review. Please address this issue as soon as possible.",
-                            CreatedAt = DateTime.UtcNow.AddDays(-random.Next(1, 14)), // Within last 2 weeks
-                            OwnerId = student.Id,
-                            Status = (FeedbackStatus)random.Next(0, 2), // Randomly Open (0) or InProgress (1)
-                            Category = (FeedbackCategory)random.Next(0, 6), // Randomize between all 6 categories
-                            IsFlagged = false
-                        });
-                    }
-                }
-            }
+            Console.WriteLine("[Seeder] Skipping feedback threads as requested.");
 
             // Update Version
             if (versionMeta == null)
@@ -109,7 +102,7 @@ public static class DatabaseSeeder
             }
 
             await context.SaveChangesAsync();
-            Console.WriteLine($"[Seeder] Successfully upgraded to v{CURRENT_SEED_VERSION}. 10 Students and 3 Admins are ready.");
+            Console.WriteLine($"[Seeder] Successfully upgraded to v{CURRENT_SEED_VERSION}. 20 Female Students and 3 Admins are ready.");
         }
         else
         {

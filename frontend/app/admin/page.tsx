@@ -230,7 +230,7 @@ export default function AdminDashboardPage() {
                   </div>
 
                   <div className="mt-4 flex justify-between items-center">
-                    <span className={`text-[9px] font-black uppercase tracking-[0.15em] ${item.status === 2 ? (item.isDenied ? "text-red-500" : "text-green-500") :
+                    <span className={`text-[10px] font-black uppercase tracking-[0.15em] shrink-0 ${item.status === 2 ? (item.isDenied ? "text-red-500" : "text-green-500") :
                       item.status === 1 ? "text-brand-warning" :
                         "text-brand-primary"
                       }`}>

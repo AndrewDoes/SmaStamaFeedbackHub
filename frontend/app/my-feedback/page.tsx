@@ -39,24 +39,24 @@ export default function MyFeedbackPage() {
         <p className="text-brand-text-body/60">Kelola dan lacak kemajuan saran pribadi Anda.</p>
       </header>
 
-      <div className="flex gap-2 md:gap-4 mb-8 p-1 bg-brand-surface rounded-2xl border border-brand-primary/5 w-full sm:w-fit overflow-x-auto no-scrollbar">
+      <div className="flex gap-2 mb-8 p-1.5 bg-brand-surface rounded-2xl border-2 border-brand-primary/10 w-full sm:w-fit">
         <button
           onClick={() => setActiveTab("active")}
-          className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === "active"
+          className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "active"
             ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20"
-            : "text-brand-text-body/60 hover:text-brand-primary"
+            : "text-brand-text-body/40 hover:text-brand-primary hover:bg-brand-primary/5"
             }`}
         >
-          Diskusi Aktif
+          Aktif
         </button>
         <button
           onClick={() => setActiveTab("history")}
-          className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === "history"
+          className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "history"
             ? "bg-brand-primary text-brand-background shadow-lg shadow-brand-primary/20"
-            : "text-brand-text-body/60 hover:text-brand-primary"
+            : "text-brand-text-body/40 hover:text-brand-primary hover:bg-brand-primary/5"
             }`}
         >
-          Riwayat Resolusi
+          Riwayat
         </button>
       </div>
 
@@ -65,14 +65,14 @@ export default function MyFeedbackPage() {
           <div
             key={item.id}
             onClick={() => router.push(`/feedback/${item.id}`)}
-            className="group bg-brand-surface p-6 rounded-3xl border border-brand-primary/5 hover:border-brand-primary/20 transition-all cursor-pointer shadow-premium hover:shadow-xl hover:-translate-y-1"
+            className="group bg-brand-surface p-6 rounded-3xl border-2 border-brand-primary/10 hover:border-brand-primary/30 transition-all cursor-pointer shadow-premium hover:shadow-xl hover:-translate-y-1"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-brand-text-main group-hover:text-brand-primary transition-colors mb-1">{item.title}</h3>
-                <p className="text-xs text-brand-text-body/40 font-medium">Dikirim pada {new Date(item.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-brand-text-main group-hover:text-brand-primary transition-colors mb-1 leading-tight">{item.title}</h3>
+                <p className="text-[10px] text-brand-text-body/30 font-black uppercase tracking-widest">Dikirim {new Date(item.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}</p>
               </div>
-              <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${item.status === 2 ? item.isDenied ? "bg-brand-error/10 text-brand-error border-brand-error/20" : "bg-brand-success/10 text-brand-success border-brand-success/20" :
+              <span className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0 ${item.status === 2 ? item.isDenied ? "bg-brand-error/10 text-brand-error border-brand-error/20" : "bg-brand-success/10 text-brand-success border-brand-success/20" :
                 item.status === 1 ? "bg-brand-warning/10 text-brand-warning border-brand-warning/20" :
                   item.status === 3 ? "bg-brand-text-body/10 text-brand-text-body/40 border-brand-text-body/10" :
                     "bg-brand-primary/10 text-brand-primary border-brand-primary/20"

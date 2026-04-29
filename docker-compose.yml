@@ -20,9 +20,9 @@ services:
     restart: always
     environment:
       - ConnectionStrings__DefaultConnection=Host=db;Database=smastama;Username=postgres;Password=smastama_dev_db_pass
-      - ConnectionStrings__AzureBlobStorage=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - ConnectionStrings__AzureBlobStorage=DefaultEndpointsProtocol=${AZURE_BLOB_STORAGE_URL}
       - AzureStorage__ContainerName=proof-attachments
-      - Jwt__Key=SecretKeyMustBeVeryLongToBeSecure123!_Production_Value
+      - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=https://smastama.com
       - Jwt__Audience=https://smastama.com
     depends_on:

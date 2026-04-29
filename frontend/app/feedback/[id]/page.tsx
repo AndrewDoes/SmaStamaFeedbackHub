@@ -76,7 +76,7 @@ export default function FeedbackDetailPage() {
       formData.append("Title", editTitle);
       formData.append("Content", editContent);
       formData.append("Category", editCategory.toString());
-      
+
       attachmentIdsToDelete.forEach(id => formData.append("AttachmentIdsToDelete", id));
       newFiles.forEach(file => formData.append("Proofs", file));
 
@@ -187,9 +187,9 @@ export default function FeedbackDetailPage() {
             ${feedback.isDenied
               ? "bg-brand-text-body/5 border-brand-text-body/20 shadow-brand-text-body/5"
               : "bg-brand-success/10 border-brand-success/30 shadow-brand-success/5"}`}>
-            <div className="flex items-start gap-6">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0
-                ${feedback.isDenied
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shrink-0
+                  ${feedback.isDenied
                   ? "bg-brand-text-body/40 shadow-brand-text-body/10"
                   : "bg-brand-success shadow-brand-success/20"}`}>
                 {feedback.isDenied ? (
@@ -225,7 +225,7 @@ export default function FeedbackDetailPage() {
         )}
 
         {/* Main Content */}
-        <section className={`bg-brand-surface p-8 rounded-3xl shadow-premium border border-brand-primary/5 transition-all duration-700
+        <section className={`bg-brand-surface p-8 rounded-3xl shadow-premium border-2 border-brand-primary/10 transition-all duration-700
           ${feedback.status === 2 ? "grayscale-[0.5] opacity-60 pointer-events-none" : ""}`}>
           <header className="mb-6">
             <div className="flex flex-col gap-4 md:flex-row md:justify-between items-start mb-4">
@@ -253,7 +253,7 @@ export default function FeedbackDetailPage() {
               ) : (
                 <h1 className="text-3xl font-bold text-brand-text-main line-clamp-2">{feedback.title}</h1>
               )}
-              
+
               <div className="flex flex-col gap-2 items-end">
                 <div className="flex gap-2 items-center">
                   {/* Author Controls */}
@@ -302,8 +302,8 @@ export default function FeedbackDetailPage() {
                     <button
                       onClick={() => setIsFlagPanelOpen(!isFlagPanelOpen)}
                       className={`px-3 py-1 text-[10px] uppercase font-bold tracking-widest rounded-full border transition-all
-                        ${isFlagPanelOpen 
-                          ? "bg-brand-error text-brand-background border-brand-error shadow-lg shadow-brand-error/20" 
+                        ${isFlagPanelOpen
+                          ? "bg-brand-error text-brand-background border-brand-error shadow-lg shadow-brand-error/20"
                           : "bg-brand-error/5 text-brand-error border-brand-error/20 hover:bg-brand-error/10"}`}
                     >
                       {isFlagPanelOpen ? "Batal Tandai" : "Tandai Utas"}
@@ -322,7 +322,7 @@ export default function FeedbackDetailPage() {
                 {isFlagPanelOpen && (
                   <div className="mt-2 w-full max-w-sm bg-brand-background p-4 rounded-2xl border border-brand-error/20 shadow-premium animate-in fade-in slide-in-from-top-2 duration-300">
                     <label className="text-[9px] font-black uppercase tracking-widest text-brand-error mb-2 block">Alasan Penandaan Administratif</label>
-                    <textarea 
+                    <textarea
                       value={flagReason}
                       onChange={(e) => setFlagReason(e.target.value)}
                       placeholder="Mengapa utas ini ditandai? (Hanya terlihat oleh HR)"
@@ -404,7 +404,7 @@ export default function FeedbackDetailPage() {
                       </div>
                     );
                   })}
-                
+
                 {/* New Files Being Added */}
                 {isEditing && newFiles.map((file, idx) => (
                   <div key={idx} className="group relative rounded-2xl overflow-hidden border border-brand-success/20 bg-brand-success/5 shadow-sm p-4 flex flex-col items-center justify-center gap-2">
@@ -485,12 +485,12 @@ export default function FeedbackDetailPage() {
               </h3>
 
               <div className="bg-brand-background/50 p-6 rounded-2xl border border-brand-primary/5">
-                <div className="flex gap-2 mb-6">
+                <div className="flex flex-wrap gap-2 mb-6">
                   {[0, 1, 2].map((s) => (
                     <button
                       key={s}
                       onClick={() => setSelectedStatus(s)}
-                      className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${selectedStatus === s
+                      className={`flex-1 sm:flex-none px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border text-center ${selectedStatus === s
                         ? "bg-brand-primary text-brand-background border-brand-primary shadow-lg shadow-brand-primary/20"
                         : "bg-brand-surface text-brand-text-body/40 border-brand-primary/10 hover:border-brand-primary/30"
                         }`}

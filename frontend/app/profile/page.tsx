@@ -11,7 +11,7 @@ export default function ProfilePage() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     setUserData({
@@ -23,12 +23,32 @@ export default function ProfilePage() {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (newPassword !== confirmPassword) {
-        throw new Error("Kata sandi baru tidak cocok.");
+      const errors: { [key: string]: string } = {};
+
+      if (!oldPassword) errors.oldPassword = "Kata sandi saat ini wajib diisi.";
+      if (!newPassword) errors.newPassword = "Kata sandi baru wajib diisi.";
+      if (!confirmPassword) errors.confirmPassword = "Konfirmasi kata sandi wajib diisi.";
+
+      if (newPassword && newPassword.length < 8) {
+        errors.newPassword = "Kata sandi harus terdiri dari minimal 8 karakter.";
+      } else if (newPassword && !/[A-Z]/.test(newPassword)) {
+        errors.newPassword = "Kata sandi harus mengandung minimal satu huruf kapital.";
+      } else if (newPassword && !/[0-9]/.test(newPassword)) {
+        errors.newPassword = "Kata sandi harus mengandung minimal satu angka.";
+      } else if (newPassword && !/[\W_]/.test(newPassword)) {
+        errors.newPassword = "Kata sandi harus mengandung minimal satu karakter khusus.";
       }
-      if (newPassword.length < 6) {
-        throw new Error("Kata sandi harus terdiri dari minimal 6 karakter.");
+
+      if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+        errors.confirmPassword = "Kata sandi baru tidak cocok.";
       }
+
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        throw new Error("Validation failed");
+      }
+
+      setFieldErrors({});
       return api.post("/auth/change-password", {
         oldPassword,
         newPassword,
@@ -40,11 +60,13 @@ export default function ProfilePage() {
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setError("");
+      setFieldErrors({});
     },
     onError: (err: any) => {
-      setError(err.response?.data?.message || err.message || "Gagal memperbarui kata sandi.");
-      toast.error("Gagal memperbarui kata sandi.");
+      if (err.message !== "Validation failed") {
+        setFieldErrors({ general: err.response?.data?.message || err.message || "Gagal memperbarui kata sandi." });
+        toast.error("Gagal memperbarui kata sandi.");
+      }
     },
   });
 
@@ -131,9 +153,9 @@ export default function ProfilePage() {
             }}
             className="space-y-5"
           >
-            {error && (
+            {fieldErrors.general && (
               <div className="p-3 bg-brand-error/10 border border-brand-error/20 text-brand-error text-[10px] font-black rounded-xl">
-                {error}
+                {fieldErrors.general}
               </div>
             )}
 
@@ -142,11 +164,14 @@ export default function ProfilePage() {
               <input
                 type="password"
                 value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                className="w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border border-brand-primary/5 focus:border-brand-primary/20 outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold"
+                onChange={(e) => {
+                  setOldPassword(e.target.value);
+                  if (fieldErrors.oldPassword) setFieldErrors(prev => ({ ...prev, oldPassword: "" }));
+                }}
+                className={`w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border ${fieldErrors.oldPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/5 focus:border-brand-primary/20'} outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold`}
                 placeholder="••••••••"
-                required
               />
+              {fieldErrors.oldPassword && <p className="text-[9px] font-bold text-brand-error ml-1">{fieldErrors.oldPassword}</p>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -155,22 +180,28 @@ export default function ProfilePage() {
                 <input
                   type="password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border border-brand-primary/5 focus:border-brand-primary/20 outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold"
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    if (fieldErrors.newPassword) setFieldErrors(prev => ({ ...prev, newPassword: "" }));
+                  }}
+                  className={`w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border ${fieldErrors.newPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/5 focus:border-brand-primary/20'} outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold`}
                   placeholder="••••••••"
-                  required
                 />
+                {fieldErrors.newPassword && <p className="text-[9px] font-bold text-brand-error ml-1">{fieldErrors.newPassword}</p>}
               </div>
               <div className="space-y-1.5">
                 <label className="text-[9px] font-black text-brand-text-main/40 uppercase tracking-[0.2em] ml-1">Konfirmasi Ulang</label>
                 <input
                   type="password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border border-brand-primary/5 focus:border-brand-primary/20 outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold"
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (fieldErrors.confirmPassword) setFieldErrors(prev => ({ ...prev, confirmPassword: "" }));
+                  }}
+                  className={`w-full px-5 py-3.5 rounded-xl bg-brand-background/30 border ${fieldErrors.confirmPassword ? 'border-brand-error/50 focus:border-brand-error' : 'border-brand-primary/5 focus:border-brand-primary/20'} outline-none transition-all placeholder:text-brand-text-body/20 text-sm font-bold`}
                   placeholder="••••••••"
-                  required
                 />
+                {fieldErrors.confirmPassword && <p className="text-[9px] font-bold text-brand-error ml-1">{fieldErrors.confirmPassword}</p>}
               </div>
             </div>
 
