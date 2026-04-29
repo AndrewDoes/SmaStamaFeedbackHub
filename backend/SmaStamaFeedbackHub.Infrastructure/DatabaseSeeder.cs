@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SmaStamaFeedbackHub.Entities;
 using SmaStamaFeedbackHub.Contracts.Enums;
+using Microsoft.Extensions.Hosting;
 
 namespace SmaStamaFeedbackHub.Infrastructure;
 
@@ -8,7 +9,7 @@ public static class DatabaseSeeder
 {
     private const int CURRENT_SEED_VERSION = 13;
 
-    public static async Task SeedAsync(AppDbContext context)
+    public static async Task SeedAsync(AppDbContext context, IHostEnvironment env)
     {
         await context.Database.MigrateAsync();
 
@@ -21,12 +22,10 @@ public static class DatabaseSeeder
         {
             Console.WriteLine($"[Seeder] Upgrading database from v{currentVersion} to v{CURRENT_SEED_VERSION}...");
             
-            // Wipe existing data
-            await context.Notifications.ExecuteDeleteAsync();
-            await context.Attachments.ExecuteDeleteAsync();
-            await context.FeedbackLogs.ExecuteDeleteAsync();
-            await context.Feedbacks.ExecuteDeleteAsync();
-            await context.Users.ExecuteDeleteAsync();
+            Console.WriteLine($"[Seeder] Upgrading database from v{currentVersion} to v{CURRENT_SEED_VERSION}...");
+            
+            // NOTE: We no longer wipe existing data here to protect production databases.
+            // If you need a fresh start, manually delete the database volume or change the DB name.
 
             Console.WriteLine("[Seeder] Seeding 3 Admins...");
             var admins = new List<User>
@@ -63,29 +62,36 @@ public static class DatabaseSeeder
                 }
             };
 
-            Console.WriteLine("[Seeder] Seeding 20 Female Students...");
-            var femaleNames = new[] {
-                "Alya Putri", "Bunga Lestari", "Citra Kirana", "Dian Sastrowardoyo", "Eka Wahyuni",
-                "Fitri Handayani", "Gita Gutawa", "Hana Pertiwi", "Indah Permatasari", "Juwita Bahar",
-                "Kartika Sari", "Lestari Ayu", "Maya Kartika", "Nia Ramadhani", "Olivia Jensen",
-                "Putri Marino", "Qory Sandioriva", "Rossa Roslaina", "Siti Nurhaliza", "Tiara Andini"
-            };
-
-            var students = femaleNames.Select((name, i) => new User
+            // Only seed fake students if we are in Development mode
+            if (env.IsDevelopment())
             {
-                Id = Guid.NewGuid(),
-                Code = $"202400{i+1:D2}",
-                FullName = name,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
-                Role = UserRole.Student,
-                BatchYear = 2024,
-                IsActive = true,
-                MustChangePassword = true
-            }).ToList();
+                Console.WriteLine("[Seeder] Seeding 20 Female Students (Development Mode)...");
+                var femaleNames = new[] {
+                    "Alya Putri", "Bunga Lestari", "Citra Kirana", "Dian Sastrowardoyo", "Eka Wahyuni",
+                    "Fitri Handayani", "Gita Gutawa", "Hana Pertiwi", "Indah Permatasari", "Juwita Bahar",
+                    "Kartika Sari", "Lestari Ayu", "Maya Kartika", "Nia Ramadhani", "Olivia Jensen",
+                    "Putri Marino", "Qory Sandioriva", "Rossa Roslaina", "Siti Nurhaliza", "Tiara Andini"
+                };
 
-            context.Users.AddRange(admins);
-            context.Users.AddRange(students);
-            await context.SaveChangesAsync();
+                var students = femaleNames.Select((name, i) => new User
+                {
+                    Id = Guid.NewGuid(),
+                    Code = $"202400{i+1:D2}",
+                    FullName = name,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("student123"),
+                    Role = UserRole.Student,
+                    BatchYear = 2024,
+                    IsActive = true,
+                    MustChangePassword = true
+                }).ToList();
+
+                context.Users.AddRange(students);
+                await context.SaveChangesAsync();
+            }
+            else
+            {
+                Console.WriteLine("[Seeder] Skipping fake students (Production/Main Mode).");
+            }
 
             Console.WriteLine("[Seeder] Skipping feedback threads as requested.");
 

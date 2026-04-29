@@ -25,6 +25,7 @@ services:
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=https://smastama.com
       - Jwt__Audience=https://smastama.com
+      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - db
     ports:
