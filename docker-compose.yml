@@ -4,9 +4,9 @@ services:
     container_name: smastama-db
     restart: always
     environment:
-      POSTGRES_DB: smastama
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: smastama_dev_db_pass
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5433:5432"
     volumes:
@@ -19,7 +19,7 @@ services:
     container_name: smastama-backend
     restart: always
     environment:
-      - ConnectionStrings__DefaultConnection=Host=db;Database=smastama;Username=postgres;Password=smastama_dev_db_pass
+      - ConnectionStrings__DefaultConnection=Host=db;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       - ConnectionStrings__AzureBlobStorage=DefaultEndpointsProtocol=${AZURE_BLOB_STORAGE_URL}
       - AzureStorage__ContainerName=proof-attachments
       - Jwt__Key=${JWT_KEY}
