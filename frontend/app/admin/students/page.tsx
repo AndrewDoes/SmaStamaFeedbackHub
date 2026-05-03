@@ -4,20 +4,47 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { userService, StudentDto } from "@/services/userService";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import BulkImportModal from "@/components/BulkImportModal";
 import CreateStudentModal from "@/components/CreateStudentModal";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function StudentDirectoryPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+
+  const [studentToDelete, setStudentToDelete] = useState<StudentDto | null>(null);
+
   // Registry.Pro uses a large flat list (spreadsheet style) instead of traditional pagination
   const { data, isLoading } = useQuery({
     queryKey: ["admin-students", search],
     queryFn: () => userService.getStudentList(1, 1000, search),
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => userService.deleteStudent(id),
+    onSuccess: () => {
+      toast.success("Siswa berhasil dihapus dari registri.");
+      queryClient.invalidateQueries({ queryKey: ["admin-students"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data || "Gagal menghapus siswa.");
+    }
+  });
+
+  const handleDelete = (student: StudentDto) => {
+    setStudentToDelete(student);
+  };
+
+  const confirmDelete = () => {
+    if (studentToDelete) {
+      deleteMutation.mutate(studentToDelete.id);
+    }
+  };
 
   return (
     <div className="w-full px-4 md:px-10 py-8 flex flex-col h-[calc(100vh-64px)]">
@@ -31,7 +58,7 @@ export default function StudentDirectoryPage() {
       <header className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6 shrink-0">
         <div className="space-y-1">
           <h1 className="text-4xl font-black text-brand-text-main tracking-tighter">
-            Registri<span className="text-brand-primary"> </span>Siswa
+            Registri<span className="text-brand-primary"> </span>Siswa <span className="text-[10px] text-brand-primary/40 font-normal">v1.1</span>
           </h1>
         </div>
 
@@ -88,6 +115,7 @@ export default function StudentDirectoryPage() {
                   <th className="pl-10 pr-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Kontributor</th>
                   <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 text-center border-b border-brand-primary/5">Angkatan</th>
                   <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5 text-right">Status</th>
+                  <th className="pr-10 pl-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-primary/[0.03]">
@@ -116,6 +144,19 @@ export default function StudentDirectoryPage() {
                           {student.isActive ? "Aktif" : "Terkunci"}
                         </span>
                       </div>
+                    </td>
+                    <td className="pr-10 pl-6 py-4 text-right">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(student); }}
+                        disabled={deleteMutation.isPending}
+                        className="p-2 text-brand-error/20 hover:text-brand-error hover:bg-brand-error/5 rounded-lg transition-all"
+                        title="Hapus Siswa"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -151,6 +192,17 @@ export default function StudentDirectoryPage() {
                         </span>
                       </div>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(student); }}
+                      disabled={deleteMutation.isPending}
+                      className="p-2 text-brand-error hover:bg-brand-error/5 rounded-lg transition-all"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -182,6 +234,16 @@ export default function StudentDirectoryPage() {
       )}
       <BulkImportModal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} />
       <CreateStudentModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
+
+      <ConfirmModal
+        isOpen={!!studentToDelete}
+        onClose={() => setStudentToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Hapus Siswa"
+        message={`Apakah Anda yakin ingin menghapus ${studentToDelete?.fullName} (${studentToDelete?.code})? Semua data terkait termasuk umpan balik akan dihapus permanen.`}
+        confirmLabel={deleteMutation.isPending ? "Menghapus..." : "Hapus Permanen"}
+        variant="danger"
+      />
     </div>
   );
 }

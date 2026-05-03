@@ -1,31 +1,14 @@
 using CsvHelper;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using SmaStamaFeedbackHub.Contracts.Requests.Users;
+using SmaStamaFeedbackHub.Contracts.Responses.Users;
 using SmaStamaFeedbackHub.Entities;
 using System.Globalization;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Users;
 
-public class ImportedStudentDetail
-{
-    public string Code { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string InitialPassword { get; set; } = string.Empty;
-}
-
-public class BulkImportResult
-{
-    public int ImportedCount { get; set; }
-    public int SkippedCount { get; set; }
-    public List<ImportedStudentDetail> ImportedStudents { get; set; } = new();
-    public List<string> Errors { get; set; } = new();
-}
-
-public class BulkImportStudentsCommand : IRequest<BulkImportResult>
-{
-    public IFormFile File { get; set; } = null!;
-}
+public class BulkImportStudentsCommand : BulkImportStudentsRequest, IRequest<BulkImportResponse>;
 
 public class StudentCsvRecord
 {
@@ -34,7 +17,7 @@ public class StudentCsvRecord
     public int BatchYear { get; set; }
 }
 
-public class BulkImportStudentsHandler : IRequestHandler<BulkImportStudentsCommand, BulkImportResult>
+public class BulkImportStudentsHandler : IRequestHandler<BulkImportStudentsCommand, BulkImportResponse>
 {
     private readonly AppDbContext _context;
     private static readonly Random _random = new();
@@ -46,20 +29,14 @@ public class BulkImportStudentsHandler : IRequestHandler<BulkImportStudentsComma
 
     private static string GenerateRandomPrefix(int length = 5)
     {
-        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"; // Removed ambiguous chars like O, 0, I, l
+        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
         return new string(Enumerable.Repeat(chars, length)
             .Select(s => s[_random.Next(s.Length)]).ToArray());
     }
 
-    public async Task<BulkImportResult> Handle(BulkImportStudentsCommand request, CancellationToken cancellationToken)
+    public async Task<BulkImportResponse> Handle(BulkImportStudentsCommand request, CancellationToken cancellationToken)
     {
-        var result = new BulkImportResult();
-
-        if (request.File == null || request.File.Length == 0)
-        {
-            result.Errors.Add("File is empty or not provided.");
-            return result;
-        }
+        var result = new BulkImportResponse();
 
         try 
         {
