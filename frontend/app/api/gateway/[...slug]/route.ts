@@ -57,9 +57,13 @@ async function proxyRequest(request: NextRequest, slug: string[]) {
       cache: 'no-store',
     });
 
-    const data = await response.text();
+    const status = response.status;
+    const isNoContent = status === 204 || status === 205 || status === 304;
+    
+    const data = isNoContent ? null : await response.text();
+    
     return new NextResponse(data, {
-      status: response.status,
+      status: status,
       headers: {
         'Content-Type': response.headers.get('Content-Type') || 'application/json',
       },

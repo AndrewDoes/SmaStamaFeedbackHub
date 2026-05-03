@@ -1,15 +1,11 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using SmaStamaFeedbackHub.Contracts.Requests.Users;
 using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Users;
 
-public class CreateStudentCommand : IRequest<string>
-{
-    public string Code { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public int BatchYear { get; set; }
-}
+public class CreateStudentCommand : CreateStudentRequest, IRequest<string>;
 
 public class CreateStudentHandler : IRequestHandler<CreateStudentCommand, string>
 {
@@ -30,21 +26,22 @@ public class CreateStudentHandler : IRequestHandler<CreateStudentCommand, string
 
     public async Task<string> Handle(CreateStudentCommand request, CancellationToken cancellationToken)
     {
+        var code = request.Code.Trim();
         var existingUser = await _context.Users
-            .AnyAsync(u => u.Code == request.Code, cancellationToken);
+            .AnyAsync(u => u.Code == code, cancellationToken);
 
         if (existingUser)
         {
-            throw new Exception($"Siswa dengan kode {request.Code} sudah terdaftar.");
+            throw new InvalidOperationException($"Siswa dengan kode {code} sudah terdaftar.");
         }
 
         var randomPrefix = GenerateRandomPrefix();
-        var initialPassword = $"{randomPrefix}{request.Code.Trim()}";
+        var initialPassword = $"{randomPrefix}{code}";
 
         var user = new User
         {
             Id = Guid.NewGuid(),
-            Code = request.Code.Trim(),
+            Code = code,
             FullName = request.FullName.Trim(),
             BatchYear = request.BatchYear,
             Role = UserRole.Student,

@@ -42,5 +42,9 @@ export const userService = {
       batchYear,
     });
     return response.data;
+  },
+
+  deleteStudent: async (id: string): Promise<void> => {
+    await api.delete(`/AdminUsers/DeleteStudent/${id}`);
   }
 };
