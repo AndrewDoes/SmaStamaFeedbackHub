@@ -1,28 +1,15 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using SmaStamaFeedbackHub.Entities;
+using SmaStamaFeedbackHub.Contracts.Requests.Users;
 using SmaStamaFeedbackHub.Contracts.Responses.Common;
+using SmaStamaFeedbackHub.Contracts.Responses.Users;
+using SmaStamaFeedbackHub.Entities;
 
 namespace SmaStamaFeedbackHub.Commons.Handlers.Users;
 
-public class StudentDto
-{
-    public Guid Id { get; set; }
-    public string Code { get; set; }
-    public string FullName { get; set; }
-    public int? BatchYear { get; set; }
-    public bool IsActive { get; set; }
-    public int FeedbackCount { get; set; }
-}
+public class GetStudentListQuery : GetStudentListRequest, IRequest<PagedResult<StudentResponse>>;
 
-public class GetStudentListQuery : IRequest<PagedResult<StudentDto>>
-{
-    public int PageNumber { get; set; } = 1;
-    public int PageSize { get; set; } = 20;
-    public string? Search { get; set; }
-}
-
-public class GetStudentListHandler : IRequestHandler<GetStudentListQuery, PagedResult<StudentDto>>
+public class GetStudentListHandler : IRequestHandler<GetStudentListQuery, PagedResult<StudentResponse>>
 {
     private readonly AppDbContext _context;
 
@@ -31,7 +18,7 @@ public class GetStudentListHandler : IRequestHandler<GetStudentListQuery, PagedR
         _context = context;
     }
 
-    public async Task<PagedResult<StudentDto>> Handle(GetStudentListQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<StudentResponse>> Handle(GetStudentListQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Users
             .Where(u => u.Role == UserRole.Student)
@@ -49,7 +36,7 @@ public class GetStudentListHandler : IRequestHandler<GetStudentListQuery, PagedR
             .OrderBy(u => u.FullName)
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(u => new StudentDto
+            .Select(u => new StudentResponse
             {
                 Id = u.Id,
                 Code = u.Code,
@@ -60,7 +47,7 @@ public class GetStudentListHandler : IRequestHandler<GetStudentListQuery, PagedR
             })
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<StudentDto>
+        return new PagedResult<StudentResponse>
         {
             Items = items,
             TotalCount = totalCount,

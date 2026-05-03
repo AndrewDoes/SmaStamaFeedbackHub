@@ -23,4 +23,25 @@ public class AdminUsersController : ControllerBase
         var result = await _mediator.Send(query);
         return Ok(result);
     }
+
+    [HttpPost("ImportStudents")]
+    public async Task<IActionResult> ImportStudents([FromForm] BulkImportStudentsCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpPost("CreateStudent")]
+    public async Task<IActionResult> CreateStudent([FromBody] CreateStudentCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return Ok(result);
+    }
+
+    [HttpDelete("DeleteStudent/{id}")]
+    public async Task<IActionResult> DeleteStudent(Guid id)
+    {
+        await _mediator.Send(new DeleteStudentCommand { Id = id });
+        return NoContent();
+    }
 }
