@@ -5,10 +5,14 @@ import { useQuery } from "@tanstack/react-query";
 import { userService, StudentDto } from "@/services/userService";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import BulkImportModal from "@/components/BulkImportModal";
+import CreateStudentModal from "@/components/CreateStudentModal";
 
 export default function StudentDirectoryPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   // Registry.Pro uses a large flat list (spreadsheet style) instead of traditional pagination
   const { data, isLoading } = useQuery({
     queryKey: ["admin-students", search],
@@ -21,7 +25,7 @@ export default function StudentDirectoryPage() {
       <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-brand-text-body/30 mb-4 shrink-0">
         <span className="hover:text-brand-primary cursor-pointer" onClick={() => router.push("/admin")}>Admin</span>
         <span>/</span>
-        <span className="text-brand-primary">Registri Siswa</span>
+        <span className="text-brand-primary">Daftar Siswa</span>
       </nav>
 
       <header className="mb-8 flex flex-col lg:flex-row lg:items-end justify-between gap-6 shrink-0">
@@ -31,8 +35,8 @@ export default function StudentDirectoryPage() {
           </h1>
         </div>
 
-        <div className="w-full lg:w-96">
-          <div className="relative group">
+        <div className="w-full lg:w-fit flex flex-col sm:flex-row gap-3">
+          <div className="relative group min-w-[300px]">
             <input
               type="text"
               placeholder="Cari nama atau kode..."
@@ -43,6 +47,29 @@ export default function StudentDirectoryPage() {
             <svg className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-brand-text-body/20 group-focus-within:text-brand-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsCreateOpen(true)}
+              className="flex-1 sm:flex-none px-6 py-4 bg-brand-primary text-brand-background rounded-[20px] shadow-premium font-bold text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Tambah Siswa</span>
+            </button>
+
+            <button
+              onClick={() => setIsImportOpen(true)}
+              className="px-6 py-4 bg-brand-surface text-brand-primary border border-brand-primary/10 rounded-[20px] shadow-premium font-bold text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              title="Impor CSV"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              <span className="hidden xl:inline">Impor CSV</span>
+            </button>
           </div>
         </div>
       </header>
@@ -153,6 +180,8 @@ export default function StudentDirectoryPage() {
           </div>
         </div>
       )}
+      <BulkImportModal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} />
+      <CreateStudentModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
     </div>
   );
 }
