@@ -52,16 +52,16 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean, onClose
         <div className="mb-4 px-2 lg:hidden">
           <Link href={isAdmin ? "/admin" : "/"} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <Image src={'https://stamayk.sch.id/icons/logostamayk.svg'} alt="Logo" width={32} height={32} className="rounded-lg" />
-            <span className="font-black text-xl text-brand-text-main tracking-tighter">STAMA Listen</span>
+            <span className="font-black text-xl text-brand-text-main tracking-tighter">STAMA Speak Up</span>
           </Link>
         </div>
 
         <div className="hidden lg:block mb-8 px-4 pb-6 border-b border-brand-primary text-center">
           <Link href={isAdmin ? "/admin" : "/"} className="inline-block group">
             <h2 className="text-xl font-black text-brand-text-main tracking-tighter uppercase group-hover:text-brand-primary transition-colors">
-              Stama<span className="text-brand-primary group-hover:text-brand-text-main"> </span>Listen
+              Stama<span className="text-brand-primary group-hover:text-brand-text-main"> </span>Speak Up
             </h2>
-            <p className="text-[8px] font-black uppercase tracking-widest text-brand-text-body/20 mt-1">Pusat Umpan Balik v1.0</p>
+            <p className="text-[8px] font-black uppercase tracking-widest text-brand-text-body/20 mt-1">Pusat Umpan Balik SMA Santa Maria Yogyakarta</p>
           </Link>
         </div>
 

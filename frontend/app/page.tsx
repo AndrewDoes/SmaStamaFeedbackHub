@@ -164,7 +164,7 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-brand-text-main mb-2">Belum ada umpan balik</h3>
-                <p className="text-brand-text-body/60 max-w-xs">Suara Anda penting. Mulai utas baru untuk berbagi saran Anda dengan administrasi.</p>
+                <p className="text-brand-text-body/60 max-w-xs">Suara Anda penting. Mulai feedback baru untuk berbagi saran Anda dengan administrasi.</p>
               </div>
             )}
           </div>

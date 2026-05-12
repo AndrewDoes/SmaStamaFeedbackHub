@@ -76,7 +76,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/40">Feed Langsung Aktif • {data?.totalCount || 0} Utas</span>
+              <span className="text-[9px] font-black uppercase tracking-widest text-brand-text-body/40">Feed Langsung Aktif • {data?.totalCount || 0} Feedback</span>
             </div>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
             <thead className="sticky top-0 z-20">
               <tr className="bg-brand-background/80 backdrop-blur-md">
                 <th className="pl-10 pr-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Kontributor</th>
-                <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Isi Utas</th>
+                <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5">Isi Feedback</th>
                 <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5 text-center">Status</th>
                 <th className="px-6 py-6 text-[10px] uppercase tracking-[0.2em] font-black text-brand-text-body/40 border-b border-brand-primary/5 text-right">Aksi</th>
               </tr>
