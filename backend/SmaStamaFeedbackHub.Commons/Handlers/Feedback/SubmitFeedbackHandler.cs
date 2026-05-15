@@ -21,8 +21,9 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
     private readonly IStorageService _storageService;
 
     private const int MAX_FILES = 5;
-    private const long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    private readonly string[] ALLOWED_TYPES = { "image/jpeg", "image/png", "image/jpg", "application/pdf" };
+    private const long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private readonly string[] ALLOWED_TYPES = { "image/jpeg", "image/png", "image/jpg", "application/pdf", "video/mp4", "video/quicktime", "video/webm" };
+    private const long TOTAL_STORAGE_QUOTA = 5L * 1024 * 1024 * 1024; // 5GB limit
     private const int DAILY_LIMIT = 5;
 
     public SubmitFeedbackHandler(AppDbContext context, IUserContext userContext, IStorageService storageService)
@@ -53,11 +54,24 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
             foreach (var file in request.Proofs)
             {
                 if (file.Length > MAX_FILE_SIZE)
-                    throw new InvalidOperationException($"File '{file.FileName}' melebihi batas ukuran 10MB.");
+                    throw new InvalidOperationException($"File '{file.FileName}' melebihi batas ukuran 5MB.");
 
                 if (!ALLOWED_TYPES.Contains(file.ContentType.ToLower()))
-                    throw new InvalidOperationException($"File '{file.FileName}' memiliki format yang tidak didukung. Hanya JPG, PNG, dan PDF yang diperbolehkan.");
+                    throw new InvalidOperationException($"File '{file.FileName}' memiliki format yang tidak didukung. Hanya JPG, PNG, PDF, MP4, MOV, dan WEBM yang diperbolehkan.");
             }
+        }
+
+        // 3. Quota Check
+        var storageMeta = await _context.SystemMetadata.FirstOrDefaultAsync(m => m.Key == "TotalStorageUsed", cancellationToken);
+        long currentStorage = 0;
+        if (storageMeta != null && long.TryParse(storageMeta.Value, out var parsedStorage))
+        {
+            currentStorage = parsedStorage;
+        }
+
+        if (currentStorage > TOTAL_STORAGE_QUOTA)
+        {
+            throw new InvalidOperationException("Penyimpanan server penuh (5GB tercapai). Tidak dapat menerima lampiran baru saat ini.");
         }
 
         var feedback = new Entities.Feedback
@@ -71,19 +85,35 @@ public class SubmitFeedbackHandler : IRequestHandler<SubmitFeedbackCommand, Guid
             Category = request.Category
         };
 
-        // 3. Handle Proofs / Attachments
+        // 4. Handle Proofs / Attachments
         if (request.Proofs != null && request.Proofs.Any())
         {
+            long newStorageAdded = 0;
             foreach (var file in request.Proofs)
             {
-                var url = await _storageService.UploadFileAsync(file, "proofs");
+                var uploadResult = await _storageService.UploadFileAsync(file, "proofs");
                 feedback.Attachments.Add(new FeedbackAttachment
                 {
                     Id = Guid.NewGuid(),
                     FileName = file.FileName,
-                    BlobUrl = url,
+                    BlobUrl = uploadResult.Url,
+                    FileSize = uploadResult.Size,
+                    ContentType = uploadResult.ContentType,
                     FeedbackId = feedback.Id
                 });
+                newStorageAdded += uploadResult.Size;
+            }
+
+            // Update quota
+            currentStorage += newStorageAdded;
+            if (storageMeta == null)
+            {
+                _context.SystemMetadata.Add(new SystemMetadata { Key = "TotalStorageUsed", Value = currentStorage.ToString() });
+            }
+            else
+            {
+                storageMeta.Value = currentStorage.ToString();
+                storageMeta.LastUpdatedAt = DateTime.UtcNow;
             }
         }
 

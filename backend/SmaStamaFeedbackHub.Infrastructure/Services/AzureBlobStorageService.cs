@@ -29,7 +29,7 @@ public class AzureBlobStorageService : IStorageService
         }
     }
 
-    public async Task<string> UploadFileAsync(IFormFile file, string folder)
+    public async Task<(string Url, long Size, string ContentType)> UploadFileAsync(IFormFile file, string folder)
     {
         EnsureConfigured();
 
@@ -71,7 +71,7 @@ public class AzureBlobStorageService : IStorageService
 
             var blobClient = containerClient.GetBlobClient(fileName);
             await blobClient.UploadAsync(outputStream, new BlobHttpHeaders { ContentType = "image/webp" });
-            return blobClient.Uri.ToString();
+            return (blobClient.Uri.ToString(), outputStream.Length, "image/webp");
         }
         else
         {
@@ -79,7 +79,7 @@ public class AzureBlobStorageService : IStorageService
             var blobClient = containerClient.GetBlobClient(fileName);
             using var stream = file.OpenReadStream();
             await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
-            return blobClient.Uri.ToString();
+            return (blobClient.Uri.ToString(), file.Length, file.ContentType);
         }
     }
 

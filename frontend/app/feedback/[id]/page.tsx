@@ -130,9 +130,18 @@ export default function FeedbackDetailPage() {
   const handleStatusUpdate = () => {
     if (selectedStatus === null) return;
 
-    if (selectedStatus === 2 && !resolutionText.trim()) {
-      toast.error("Harap berikan kesimpulan resolusi sebelum menyelesaikan.");
-      return;
+    if (selectedStatus === 2) {
+      if (!resolutionText.trim()) {
+        toast.error("Harap berikan kesimpulan resolusi sebelum menyelesaikan.");
+        return;
+      }
+
+      if (feedback?.attachments && feedback.attachments.length > 0) {
+        const confirmMsg = "PERINGATAN PENYIMPANAN:\n\nMenyelesaikan umpan balik ini akan SECARA PERMANEN MENGHAPUS semua lampiran (foto/video) dari server untuk menghemat ruang penyimpanan. Teks percakapan akan tetap tersimpan.\n\nApakah Anda yakin ingin melanjutkan?";
+        if (!window.confirm(confirmMsg)) {
+          return;
+        }
+      }
     }
 
     statusMutation.mutate({
@@ -399,6 +408,11 @@ export default function FeedbackDetailPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                             <span className="text-[10px] font-bold text-brand-primary uppercase tracking-wider text-center line-clamp-1">{att.fileName}</span>
+                            {att.fileSize && (
+                              <span className="text-[8px] font-bold text-brand-text-body/40 bg-brand-primary/5 px-2 py-0.5 rounded-md">
+                                {(att.fileSize / (1024 * 1024)).toFixed(2)} MB • {att.contentType?.split('/')[1]?.toUpperCase() || 'FILE'}
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>
