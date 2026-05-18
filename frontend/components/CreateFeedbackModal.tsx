@@ -31,7 +31,7 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
 
   const MAX_FILES = 5;
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf', 'video/mp4', 'video/quicktime', 'video/webm'];
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf', 'video/mp4', 'video/quicktime', 'video/webm'];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -49,7 +49,7 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
           return;
         }
         if (!ALLOWED_TYPES.includes(file.type)) {
-          setError(`File "${file.name}" memiliki format yang tidak didukung. Hanya JPG, PNG, PDF, dan Video (MP4/MOV/WEBM) yang diperbolehkan.`);
+          setError(`File "${file.name}" memiliki format yang tidak didukung. Hanya JPG, PNG, WEBP, PDF, dan Video (MP4/MOV/WEBM) yang diperbolehkan.`);
           return;
         }
       }
@@ -185,14 +185,14 @@ export default function CreateFeedbackModal({ isOpen, onClose }: CreateFeedbackM
                   onChange={handleFileChange}
                   className="hidden"
                   multiple
-                  accept="image/png, image/jpeg, image/jpg, application/pdf, video/mp4, video/quicktime, video/webm"
+                  accept="image/png, image/jpeg, image/jpg, image/webp, application/pdf, video/mp4, video/quicktime, video/webm"
                 />
               </div>
               <p className="mt-2 text-[10px] text-brand-text-body/40 flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Maksimal 5 file, masing-masing 5MB. Tipe: JPG, PNG, PDF, MP4, MOV, WEBM.
+                Maksimal 5 file, masing-masing 5MB. Tipe: JPG, PNG, WEBP, PDF, MP4, MOV, WEBM.
               </p>
             </div>
 

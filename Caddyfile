@@ -5,6 +5,9 @@
 
 # Listen on port 80 (HTTP) for local network access
 :80 {
+    # Send uploaded static files to the backend
+    reverse_proxy /uploads/* backend:8080
+
     # Send traffic to the frontend container
     reverse_proxy frontend:3000
 }
