@@ -73,5 +73,13 @@ services:
       frontend:
         condition: service_healthy
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: smastama-tunnel
+    command: tunnel --url http://proxy:80
+    restart: always
+    depends_on:
+      - proxy
+
 volumes:
   postgres_data:
