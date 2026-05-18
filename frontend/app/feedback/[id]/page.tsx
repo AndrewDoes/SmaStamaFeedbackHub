@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { feedbackService, FeedbackDto } from "@/services/feedbackService";
+import { feedbackService, FeedbackDto, AttachmentDto } from "@/services/feedbackService";
 import { authService } from "@/services/auth";
 import toast from "react-hot-toast";
 
@@ -21,6 +21,18 @@ export default function FeedbackDetailPage() {
   const [isDenied, setIsDenied] = useState(false);
   const [isFlagPanelOpen, setIsFlagPanelOpen] = useState(false);
   const [flagReason, setFlagReason] = useState("");
+  const [activePreview, setActivePreview] = useState<AttachmentDto | null>(null);
+
+  // Keyboard shortcut to close preview modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActivePreview(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const { data: feedback, isLoading, error, refetch } = useQuery({
     queryKey: ["feedback", id],
@@ -387,6 +399,7 @@ export default function FeedbackDetailPage() {
                   .filter(att => !attachmentIdsToDelete.includes(att.id))
                   .map((att, index) => {
                     const isImage = att.url.match(/\.(jpg|jpeg|png|webp|gif)/i);
+                    const isVideo = att.url.match(/\.(mp4|mov|webm)/i) || att.contentType?.startsWith('video/');
                     return (
                       <div key={att.id} className="group relative rounded-2xl overflow-hidden border border-brand-primary/10 bg-brand-surface shadow-sm hover:shadow-md transition-all">
                         {isEditing && (
@@ -399,18 +412,32 @@ export default function FeedbackDetailPage() {
                           </button>
                         )}
                         {isImage ? (
-                          <div className="block aspect-square cursor-pointer">
+                          <div 
+                            onClick={() => !isEditing && setActivePreview(att)}
+                            className="block aspect-square cursor-pointer"
+                          >
                             <img src={att.url} alt={`Attachment ${index + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           </div>
                         ) : (
-                          <div className="aspect-square flex flex-col items-center justify-center p-4 gap-2">
-                            <svg className="w-10 h-10 text-brand-primary/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
+                          <div 
+                            onClick={() => !isEditing && setActivePreview(att)}
+                            className="aspect-square flex flex-col items-center justify-center p-4 gap-2 cursor-pointer hover:bg-brand-primary/[0.02] transition-colors"
+                          >
+                            {isVideo ? (
+                              <div className="relative w-10 h-10 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform">
+                                <svg className="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
+                            ) : (
+                              <svg className="w-10 h-10 text-brand-primary/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>
+                            )}
                             <span className="text-[10px] font-bold text-brand-primary uppercase tracking-wider text-center line-clamp-1">{att.fileName}</span>
                             {att.fileSize && (
                               <span className="text-[8px] font-bold text-brand-text-body/40 bg-brand-primary/5 px-2 py-0.5 rounded-md">
-                                {(att.fileSize / (1024 * 1024)).toFixed(2)} MB • {att.contentType?.split('/')[1]?.toUpperCase() || 'FILE'}
+                                {(att.fileSize / (1024 * 1024)).toFixed(2)} MB • {isVideo ? 'VIDEO' : (att.contentType?.split('/')[1]?.toUpperCase() || 'FILE')}
                               </span>
                             )}
                           </div>
@@ -741,6 +768,93 @@ export default function FeedbackDetailPage() {
               )}
             </div>
           </section>
+        )}
+        {/* Lightbox / Preview Modal */}
+        {activePreview && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setActivePreview(null)}
+          >
+            <div 
+              className="relative w-full max-w-4xl max-h-[90vh] flex flex-col bg-brand-surface rounded-3xl border border-brand-primary/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header / Info bar */}
+              <div className="flex items-center justify-between p-4 bg-brand-background/40 border-b border-brand-primary/5">
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 bg-brand-primary/10 text-brand-primary text-[10px] font-black uppercase tracking-wider rounded-md border border-brand-primary/10">
+                    {activePreview.contentType?.split('/')[1]?.toUpperCase() || 'FILE'}
+                  </span>
+                  <span className="text-xs font-bold text-brand-text-main truncate max-w-[200px] sm:max-w-md" title={activePreview.fileName}>
+                    {activePreview.fileName}
+                  </span>
+                  {activePreview.fileSize && (
+                    <span className="text-[10px] text-brand-text-body/40">
+                      ({(activePreview.fileSize / (1024 * 1024)).toFixed(2)} MB)
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={activePreview.url}
+                    download={activePreview.fileName}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-brand-background text-[10px] font-black uppercase tracking-widest rounded-full transition-all flex items-center gap-1.5 border border-brand-primary/20"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Unduh
+                  </a>
+                  <button
+                    onClick={() => setActivePreview(null)}
+                    className="w-8 h-8 flex items-center justify-center bg-brand-primary/5 hover:bg-brand-error hover:text-brand-background text-brand-text-body rounded-full transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Media Content */}
+              <div className="flex-1 overflow-auto p-6 flex items-center justify-center bg-black/5 min-h-[300px]">
+                {activePreview.contentType?.startsWith('image/') || activePreview.url.match(/\.(jpg|jpeg|png|webp|gif)/i) ? (
+                  <img 
+                    src={activePreview.url} 
+                    alt={activePreview.fileName} 
+                    className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-lg border border-brand-primary/5 select-none"
+                  />
+                ) : activePreview.contentType?.startsWith('video/') || activePreview.url.match(/\.(mp4|mov|webm)/i) ? (
+                  <video 
+                    src={activePreview.url} 
+                    controls 
+                    autoPlay
+                    className="max-w-full max-h-[70vh] object-contain rounded-xl shadow-lg"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-12 text-center max-w-sm">
+                    <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center mb-4">
+                      <svg className="w-8 h-8 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-sm font-bold text-brand-text-main mb-2">Pratinjau Tidak Tersedia</h4>
+                    <p className="text-xs text-brand-text-body/60 mb-6">File format ini ({activePreview.contentType || 'unknown'}) tidak dapat diputar langsung di browser.</p>
+                    <a
+                      href={activePreview.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3 bg-brand-primary text-brand-background text-xs font-black uppercase tracking-widest rounded-xl text-center shadow-md hover:bg-brand-primary/95 transition-all"
+                    >
+                      Buka di Tab Baru
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
