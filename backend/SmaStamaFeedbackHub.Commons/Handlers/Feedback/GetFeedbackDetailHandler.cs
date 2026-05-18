@@ -76,7 +76,9 @@ public class GetFeedbackDetailHandler : IRequestHandler<GetFeedbackDetailQuery, 
             {
                 Id = a.Id,
                 Url = a.BlobUrl,
-                FileName = a.FileName
+                FileName = a.FileName,
+                FileSize = a.FileSize,
+                ContentType = a.ContentType
             }).ToList(),
             AuditLogs = isAdmin ? item.Logs.OrderByDescending(l => l.CreatedAt).Select(l => new FeedbackLogDto
             {

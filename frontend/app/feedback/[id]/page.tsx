@@ -119,7 +119,7 @@ export default function FeedbackDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ["feedback", id] });
       await queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
       await queryClient.invalidateQueries({ queryKey: ["admin-queue"] });
-      toast.success("Status utas diperbarui");
+      toast.success("Status feedback diperbarui");
     },
     onError: (err: any) => {
       toast.error("Gagal memperbarui status. Pastikan Anda masuk sebagai administrator.");
@@ -130,9 +130,18 @@ export default function FeedbackDetailPage() {
   const handleStatusUpdate = () => {
     if (selectedStatus === null) return;
 
-    if (selectedStatus === 2 && !resolutionText.trim()) {
-      toast.error("Harap berikan kesimpulan resolusi sebelum menyelesaikan.");
-      return;
+    if (selectedStatus === 2) {
+      if (!resolutionText.trim()) {
+        toast.error("Harap berikan kesimpulan resolusi sebelum menyelesaikan.");
+        return;
+      }
+
+      if (feedback?.attachments && feedback.attachments.length > 0) {
+        const confirmMsg = "PERINGATAN PENYIMPANAN:\n\nMenyelesaikan umpan balik ini akan SECARA PERMANEN MENGHAPUS semua lampiran (foto/video) dari server untuk menghemat ruang penyimpanan. Teks percakapan akan tetap tersimpan.\n\nApakah Anda yakin ingin melanjutkan?";
+        if (!window.confirm(confirmMsg)) {
+          return;
+        }
+      }
     }
 
     statusMutation.mutate({
@@ -148,7 +157,7 @@ export default function FeedbackDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ["feedback", id] });
       await queryClient.invalidateQueries({ queryKey: ["feedbacks"] });
       await queryClient.invalidateQueries({ queryKey: ["admin-queue"] });
-      toast.success("Utas dilaporkan ke administrasi");
+      toast.success("feedback dilaporkan ke administrasi");
     }
   });
 
@@ -217,7 +226,7 @@ export default function FeedbackDetailPage() {
                   </p>
                 </div>
                 <p className={`mt-4 text-[10px] font-bold uppercase tracking-widest ${feedback.isDenied ? "text-brand-text-body/30" : "text-brand-success/40"}`}>
-                  Utas ini sekarang diarsipkan sebagai catatan permanen perbaikan sekolah.
+                  feedback ini sekarang diarsipkan sebagai catatan permanen perbaikan sekolah.
                 </p>
               </div>
             </div>
@@ -306,12 +315,12 @@ export default function FeedbackDetailPage() {
                           ? "bg-brand-error text-brand-background border-brand-error shadow-lg shadow-brand-error/20"
                           : "bg-brand-error/5 text-brand-error border-brand-error/20 hover:bg-brand-error/10"}`}
                     >
-                      {isFlagPanelOpen ? "Batal Tandai" : "Tandai Utas"}
+                      {isFlagPanelOpen ? "Batal Tandai" : "Tandai feedback"}
                     </button>
                   )}
                   {feedback.isFlagged && (
                     <span className="px-3 py-1 bg-brand-error/10 text-brand-error text-[10px] uppercase font-bold tracking-widest rounded-full border border-brand-error/20">
-                      Utas Ditandai
+                      feedback Ditandai
                     </span>
                   )}
                   <span className="px-3 py-1 bg-brand-primary/5 text-brand-primary text-[10px] uppercase font-bold tracking-widest rounded-full border border-brand-primary/10">
@@ -325,7 +334,7 @@ export default function FeedbackDetailPage() {
                     <textarea
                       value={flagReason}
                       onChange={(e) => setFlagReason(e.target.value)}
-                      placeholder="Mengapa utas ini ditandai? (Hanya terlihat oleh HR)"
+                      placeholder="Mengapa feedback ini ditandai? (Hanya terlihat oleh HR)"
                       className="w-full bg-brand-surface border border-brand-error/10 rounded-xl p-3 text-xs text-brand-text-main focus:ring-2 focus:ring-brand-error/10 outline-none min-h-[80px] transition-all mb-3"
                     />
                     <button
@@ -340,7 +349,7 @@ export default function FeedbackDetailPage() {
                       }}
                       className="w-full py-2 bg-brand-error text-brand-background font-black uppercase tracking-widest text-[9px] rounded-lg shadow-sm hover:bg-brand-error/90 transition-all"
                     >
-                      Konfirmasi Tandai Utas
+                      Konfirmasi Tandai feedback
                     </button>
                   </div>
                 )}
@@ -399,6 +408,11 @@ export default function FeedbackDetailPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                             <span className="text-[10px] font-bold text-brand-primary uppercase tracking-wider text-center line-clamp-1">{att.fileName}</span>
+                            {att.fileSize && (
+                              <span className="text-[8px] font-bold text-brand-text-body/40 bg-brand-primary/5 px-2 py-0.5 rounded-md">
+                                {(att.fileSize / (1024 * 1024)).toFixed(2)} MB • {att.contentType?.split('/')[1]?.toUpperCase() || 'FILE'}
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>
@@ -620,7 +634,7 @@ export default function FeedbackDetailPage() {
                     <svg className="w-4 h-4 text-brand-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-brand-text-body/40 text-center">
-                    Komunikasi akan dibuka setelah administrator mengakui utas ini
+                    Komunikasi akan dibuka setelah administrator mengakui feedback ini
                   </p>
                 </div>
               ) : (

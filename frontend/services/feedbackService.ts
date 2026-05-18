@@ -13,6 +13,8 @@ export interface AttachmentDto {
   id: string;
   url: string;
   fileName: string;
+  fileSize: number;
+  contentType: string;
 }
 
 export interface FeedbackDto {

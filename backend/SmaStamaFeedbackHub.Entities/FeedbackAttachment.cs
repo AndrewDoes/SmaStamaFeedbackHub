@@ -12,6 +12,10 @@ public class FeedbackAttachment
     [Required]
     public string BlobUrl { get; set; } = string.Empty;
     
+    public long FileSize { get; set; }
+    
+    public string ContentType { get; set; } = string.Empty;
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public Guid FeedbackId { get; set; }

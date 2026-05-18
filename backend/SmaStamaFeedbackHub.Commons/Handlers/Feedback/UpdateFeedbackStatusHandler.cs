@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using SmaStamaFeedbackHub.Commons.Services;
 using SmaStamaFeedbackHub.Contracts.Enums;
 using SmaStamaFeedbackHub.Entities;
@@ -18,12 +19,14 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
     private readonly AppDbContext _context;
     private readonly IUserContext _userContext;
     private readonly INotificationService _notificationService;
+    private readonly IStorageService _storageService;
 
-    public UpdateFeedbackStatusHandler(AppDbContext context, IUserContext userContext, INotificationService notificationService)
+    public UpdateFeedbackStatusHandler(AppDbContext context, IUserContext userContext, INotificationService notificationService, IStorageService storageService)
     {
         _context = context;
         _userContext = userContext;
         _notificationService = notificationService;
+        _storageService = storageService;
     }
 
     public async Task Handle(UpdateFeedbackStatusCommand request, CancellationToken cancellationToken)
@@ -34,7 +37,9 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
             throw new UnauthorizedAccessException("Akses Ditolak: Hanya administrator yang dapat memperbarui status umpan balik.");
         }
 
-        var feedback = await _context.Feedbacks.FindAsync(new object[] { request.Id }, cancellationToken);
+        var feedback = await _context.Feedbacks
+            .Include(f => f.Attachments)
+            .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
         if (feedback == null)
         {
             throw new KeyNotFoundException("Catatan umpan balik tidak ditemukan.");
@@ -56,6 +61,33 @@ public class UpdateFeedbackStatusHandler : IRequestHandler<UpdateFeedbackStatusC
             feedback.Resolution = request.Resolution;
             feedback.ResolvedAt = DateTime.UtcNow;
             feedback.IsDenied = request.IsDenied ?? false;
+
+            // --- IMMEDIATE PURGE CLEANUP ---
+            if (feedback.Attachments.Any())
+            {
+                long storageFreed = 0;
+                foreach (var att in feedback.Attachments.ToList())
+                {
+                    await _storageService.DeleteFileAsync(att.BlobUrl);
+                    storageFreed += att.FileSize;
+                }
+
+                // Delete records from database
+                _context.Attachments.RemoveRange(feedback.Attachments);
+                feedback.Attachments.Clear();
+
+                // Update server storage quota
+                if (storageFreed > 0)
+                {
+                    var storageMeta = await _context.SystemMetadata.FirstOrDefaultAsync(m => m.Key == "TotalStorageUsed", cancellationToken);
+                    if (storageMeta != null && long.TryParse(storageMeta.Value, out var currentStorage))
+                    {
+                        currentStorage = Math.Max(0, currentStorage - storageFreed);
+                        storageMeta.Value = currentStorage.ToString();
+                        storageMeta.LastUpdatedAt = DateTime.UtcNow;
+                    }
+                }
+            }
         }
 
         _context.FeedbackLogs.Add(new FeedbackLog

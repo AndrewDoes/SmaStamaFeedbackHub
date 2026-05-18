@@ -2,6 +2,9 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Webp;
 using SmaStamaFeedbackHub.Commons.Services;
 
 namespace SmaStamaFeedbackHub.Infrastructure.Services;
@@ -26,7 +29,7 @@ public class AzureBlobStorageService : IStorageService
         }
     }
 
-    public async Task<string> UploadFileAsync(IFormFile file, string folder)
+    public async Task<(string Url, long Size, string ContentType)> UploadFileAsync(IFormFile file, string folder)
     {
         EnsureConfigured();
 
@@ -43,13 +46,41 @@ public class AzureBlobStorageService : IStorageService
             await containerClient.CreateIfNotExistsAsync(PublicAccessType.None);
         }
 
-        var fileName = $"{folder}/{Guid.NewGuid()}_{file.FileName}";
-        var blobClient = containerClient.GetBlobClient(fileName);
+        var isImage = file.ContentType.StartsWith("image/");
+        var fileName = $"{folder}/{Guid.NewGuid()}_{Path.GetFileNameWithoutExtension(file.FileName)}";
+        
+        if (isImage)
+        {
+            fileName += ".webp";
+            using var inputStream = file.OpenReadStream();
+            using var image = await Image.LoadAsync(inputStream);
+            
+            // Resize if too large (e.g., max 1200px width)
+            if (image.Width > 1200)
+            {
+                image.Mutate(x => x.Resize(new ResizeOptions
+                {
+                    Size = new Size(1200, 0),
+                    Mode = ResizeMode.Max
+                }));
+            }
 
-        using var stream = file.OpenReadStream();
-        await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
+            using var outputStream = new MemoryStream();
+            await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = 75 });
+            outputStream.Position = 0;
 
-        return blobClient.Uri.ToString();
+            var blobClient = containerClient.GetBlobClient(fileName);
+            await blobClient.UploadAsync(outputStream, new BlobHttpHeaders { ContentType = "image/webp" });
+            return (blobClient.Uri.ToString(), outputStream.Length, "image/webp");
+        }
+        else
+        {
+            fileName += Path.GetExtension(file.FileName);
+            var blobClient = containerClient.GetBlobClient(fileName);
+            using var stream = file.OpenReadStream();
+            await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
+            return (blobClient.Uri.ToString(), file.Length, file.ContentType);
+        }
     }
 
     public async Task DeleteFileAsync(string fileUrl)
