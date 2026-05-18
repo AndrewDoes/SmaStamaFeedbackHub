@@ -43,12 +43,15 @@ public class UpdateFeedbackHandler : IRequestHandler<UpdateFeedbackCommand, bool
             throw new InvalidOperationException("This thread is already being processed and cannot be edited.");
 
         // 3. Delete requested attachments
+        long storageChange = 0;
+
         if (request.AttachmentIdsToDelete != null && request.AttachmentIdsToDelete.Any())
         {
             var toDelete = feedback.Attachments.Where(a => request.AttachmentIdsToDelete.Contains(a.Id)).ToList();
             foreach (var att in toDelete)
             {
                 await _storageService.DeleteFileAsync(att.BlobUrl);
+                storageChange -= att.FileSize;
                 _context.Attachments.Remove(att);
             }
         }
@@ -58,14 +61,40 @@ public class UpdateFeedbackHandler : IRequestHandler<UpdateFeedbackCommand, bool
         {
             foreach (var file in request.Proofs)
             {
-                var url = await _storageService.UploadFileAsync(file, "proofs");
+                var uploadResult = await _storageService.UploadFileAsync(file, "proofs");
                 feedback.Attachments.Add(new FeedbackAttachment
                 {
                     Id = Guid.NewGuid(),
                     FileName = file.FileName,
-                    BlobUrl = url,
+                    BlobUrl = uploadResult.Url,
+                    FileSize = uploadResult.Size,
+                    ContentType = uploadResult.ContentType,
                     FeedbackId = feedback.Id
                 });
+                storageChange += uploadResult.Size;
+            }
+        }
+
+        // Apply Storage Quota Delta
+        if (storageChange != 0)
+        {
+            var storageMeta = await _context.SystemMetadata.FirstOrDefaultAsync(m => m.Key == "TotalStorageUsed", cancellationToken);
+            long currentStorage = 0;
+            if (storageMeta != null && long.TryParse(storageMeta.Value, out var parsedStorage))
+            {
+                currentStorage = parsedStorage;
+            }
+
+            currentStorage = Math.Max(0, currentStorage + storageChange);
+
+            if (storageMeta == null)
+            {
+                _context.SystemMetadata.Add(new SystemMetadata { Key = "TotalStorageUsed", Value = currentStorage.ToString() });
+            }
+            else
+            {
+                storageMeta.Value = currentStorage.ToString();
+                storageMeta.LastUpdatedAt = DateTime.UtcNow;
             }
         }
 

@@ -47,10 +47,23 @@ public class DeleteFeedbackHandler : IRequestHandler<DeleteFeedbackCommand, bool
                 throw new InvalidOperationException("You cannot delete feedback that is already in progress or resolved.");
         }
 
-        // 2. Storage Cleanup
+        // 2. Storage Cleanup & Quota Update
+        long storageFreed = 0;
         foreach (var att in feedback.Attachments)
         {
             await _storageService.DeleteFileAsync(att.BlobUrl);
+            storageFreed += att.FileSize;
+        }
+
+        if (storageFreed > 0)
+        {
+            var storageMeta = await _context.SystemMetadata.FirstOrDefaultAsync(m => m.Key == "TotalStorageUsed", cancellationToken);
+            if (storageMeta != null && long.TryParse(storageMeta.Value, out var currentStorage))
+            {
+                currentStorage = Math.Max(0, currentStorage - storageFreed);
+                storageMeta.Value = currentStorage.ToString();
+                storageMeta.LastUpdatedAt = DateTime.UtcNow;
+            }
         }
 
         // 3. Notification Cleanup
